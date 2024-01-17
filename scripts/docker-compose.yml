@@ -1,0 +1,101 @@
+version: "3.9"
+services:
+  monitoring-app-pg-dev:
+    hostname: monitoring-app-pg-dev
+    container_name: monitoring-app-pg-dev
+    restart: unless-stopped
+    image: postgres:16.0-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=monitoring-app-dev
+    volumes:
+      - $INIT_SCRIPT:/docker-entrypoint-initdb.d/init.sql:r
+      - ../db-dev-data:/var/lib/postgresql/data:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 20m
+        max-file: 5
+        compress: "true"
+    stop_grace_period: 2s
+    healthcheck:
+      test: pg_isready -p 5432 -U admin -d monitoring-app-dev
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    command: postgres -p 5432
+
+  monitoring-app-pg-test:
+    hostname: monitoring-app-pg-test
+    container_name: monitoring-app-pg-test
+    restart: unless-stopped
+    image: postgres:16.0-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=monitoring-app-test
+    volumes:
+      - $INIT_SCRIPT:/docker-entrypoint-initdb.d/init.sql:r
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 20m
+        max-file: 5
+        compress: "true"
+    stop_grace_period: 2s
+    healthcheck:
+      test: pg_isready -p 5432 -U admin -d monitoring-app-test
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    command: postgres -p 5432
+
+  ##################################################################################
+
+  monitoring-app-dev:
+    hostname: monitoring-app-be-dev
+    container_name: monitoring-app-be-dev
+    restart: unless-stopped
+    build:
+      context: ../be
+      dockerfile: Dockerfile
+      target: be-dev
+    user: ${HOST_UID}:${HOST_GID}
+    environment:
+      - SERVER_PORT=4500
+      - SERVER_DEBUG_PORT=9229
+      - SERVER_URL=http://localhost
+      - API_ROUTE=api/v0
+      - HEALTH_CHECK_ROUTE=health
+      - ALLOWED_ORIGINS=http://localhost:4501
+      - DB_URI=postgres://admin:admin@monitoring-app-pg-dev:5432/monitoring-app-dev
+      - NODE_ENV=development
+    volumes:
+      - ../be:/home/node:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 20m
+        max-file: 5
+        compress: "true"
+    stop_grace_period: 2s
+    ports:
+      - "4500:4500"
+      - "9229:9229"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -o /dev/null -w '%{http_code}' http://localhost:4500/health | grep -q '204'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 45s
+    depends_on:
+      monitoring-app-pg-dev:
+        condition: service_healthy
+      monitoring-app-pg-test:
+        condition: service_healthy
+    command: /bin/sh -c "npm install --ddd && npm run start:dev"

@@ -1,0 +1,29 @@
+# Ignore everything
+*
+
+# Exclude folders from above rule
+!**/
+
+# Block previously allowed folders
+**/.cache/
+**/.npm/
+**/build/
+**/coverage/
+**/db-dev-data/
+**/node_modules/
+
+# Exclude source files
+!*.ts
+!.eslintrc.cjs
+!loader.js
+
+# Etc
+!*.json
+!*.sh
+!*.md
+!*.yml
+!Dockerfile
+!.gitignore
+
+# Block previously allowed files
+**/settings.json
