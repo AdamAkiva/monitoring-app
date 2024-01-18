@@ -1,5 +1,5 @@
 {
-  "id": "b164f475-8721-4b69-a8a5-815818c3e673",
+  "id": "2cc966e1-dd73-4ba7-961d-60e4ecbb082b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -59,7 +59,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "website_color_unique_constraint": {
+          "name": "website_color_unique_constraint",
+          "nullsNotDistinct": false,
+          "columns": [
+            "website_id",
+            "color"
+          ]
+        }
+      }
     },
     "websites": {
       "name": "websites",
@@ -113,7 +122,16 @@
       }
     }
   },
-  "enums": {},
+  "enums": {
+    "color": {
+      "name": "color",
+      "values": {
+        "green": "green",
+        "orange": "orange",
+        "red": "red"
+      }
+    }
+  },
   "schemas": {},
   "_meta": {
     "columns": {},
