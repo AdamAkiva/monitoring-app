@@ -12,14 +12,6 @@ export default defineConfig({
     server: {
       sourcemap: 'inline'
     },
-    reporters: 'default',
-    coverage: {
-      enabled: true,
-      provider: 'v8',
-      reporter: ['text', 'html', 'clover', 'json', 'cobertura'],
-      include: ['src/**/*.ts'],
-      exclude: ['{src/main.ts,src/utils/logger.ts,src/types/index.d.ts}'],
-      reportsDirectory: './__tests__/coverage/'
-    }
+    reporters: 'default'
   }
 });

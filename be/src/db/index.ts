@@ -5,10 +5,10 @@ import DatabaseHandler, {
   type Transaction
 } from './handler.js';
 import type {
+  CreateService,
   CreateThreshold,
-  CreateWebsite,
-  DThreshold,
-  DWebsite
+  DService,
+  DThreshold
 } from './schemas.js';
 
 /**********************************************************************************/
@@ -16,11 +16,11 @@ import type {
 export {
   DatabaseHandler,
   ERR_CODES,
+  type CreateService,
   type CreateThreshold,
-  type CreateWebsite,
   type DBHandler,
   type DBModels,
+  type DService,
   type DThreshold,
-  type DWebsite,
   type Transaction
 };

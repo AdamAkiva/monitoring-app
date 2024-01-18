@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: Monitoring application
+  description: >
+    Describes the operations and schemas forMonitoring application
+  version: 1.0.11
+servers:
+  - url: http://localhost:4500/v0/api
+tags:
+  - name: service
+    description: service related routes
+paths:
+  /services:
+    get:
+      tags:
+        - service
+      summary: Fetch all monitored services
+      description: Fetch all monitored services
+      responses:
+        '200':
+          $ref: '#/components/responses/Services'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+    post:
+      tags:
+        - service
+      summary: Create a new monitored service
+      description: Create a new monitored service
+      requestBody:
+        $ref: '#/components/requestBodies/ServiceCreationObj'
+      responses:
+        '200':
+          $ref: '#/components/responses/Service'
+        '400':
+          $ref: '#/components/responses/InvalidInputError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /services/{serviceId}:
+    patch:
+      tags:
+        - service
+      summary: Update a specific monitored service
+      description: Update a specific monitored service
+      parameters:
+        - name: serviceId
+          in: path
+          description: The id of an existing service
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: adb3271f-94dc-4169-80e9-3d4c8a90201f
+      responses:
+        '200':
+          $ref: '#/components/responses/Service'
+        '400':
+          $ref: '#/components/responses/InvalidInputError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+    delete:
+      tags:
+        - service
+      summary: Delete a specific monitored service
+      description: Delete a specific monitored service
+      parameters:
+        - name: serviceId
+          in: path
+          description: The id of an existing service
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: adb3271f-94dc-4169-80e9-3d4c8a90201f
+      responses:
+        '200':
+          description: >
+            Deleted program id on success
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+                example: adb3271f-94dc-4169-80e9-3d4c8a90201f
+        '400':
+          $ref: '#/components/responses/InvalidInputError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+components:
+  schemas:
+    ServiceCreationObj:
+      type: object
+      required:
+        - uri
+        - monitorInterval
+        - thresholds
+      properties:
+        name:
+          type: string
+          description: >
+            The name for the monitored service. Defaults to uri if not supplied
+          example: Google
+        uri:
+          type: string
+          format: uri
+          example: https://google.com
+        monitorInterval:
+          type: number
+          description: The interval of every latency check
+        thresholds:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - lowerLimit
+              - upperLimit
+            properties:
+              lowerLimit:
+                type: number
+                description: >
+                  Milliseconds representing the lower limit for the threshold check
+                example: 20
+              upperLimit:
+                type: number
+                description: >
+                  Milliseconds representing the upper limit for the threshold check
+                example: 50
+    ServiceUpdatesObj:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Google
+        uri:
+          type: string
+          format: uri
+          example: https://google.com
+        monitorInterval:
+          type: number
+          description: The interval of every latency check
+        thresholds:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - lowerLimit
+              - upperLimit
+            properties:
+              lowerLimit:
+                type: number
+                description: >
+                  Milliseconds representing the lower limit for the threshold check
+                example: 20
+              upperLimit:
+                type: number
+                description: >
+                  Milliseconds representing the upper limit for the threshold check
+                example: 50
+    Service:
+      type: object
+      required:
+        - id
+        - name
+        - uri
+        - monitorInterval
+        - thresholds
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: adb3271f-94dc-4169-80e9-3d4c8a90201f
+        name:
+          type: string
+          example: Google
+        uri:
+          type: string
+          format: uri
+          example: https://google.com
+        monitorInterval:
+          type: number
+          description: >
+            The interval of every latency check
+        thresholds:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - lowerLimit
+              - upperLimit
+            properties:
+              lowerLimit:
+                type: number
+                description: >
+                  Milliseconds representing the lower limit for the threshold check
+                example: 20
+              upperLimit:
+                type: number
+                description: >
+                  Milliseconds representing the upper limit for the threshold check
+                example: 50
+  requestBodies:
+    ServiceCreationObj:
+      description: An object of monitored service creation
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceCreationObj'
+    ServiceUpdatesObj:
+      description: An object of monitored service updates
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServiceUpdatesObj'
+  responses:
+    Service:
+      description: A monitored service object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Service'
+    Services:
+      description: An array of monitored service objects
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Service'
+    InvalidInputError:
+      description: Invalid input supplied by the client
+    NotFoundError:
+      description: Requested entity not found
+    ConflictError:
+      description: Requested entity already exists
+    PayloadTooLargeError:
+      description: Requested payload is too large
+    ServerError:
+      description: Server related error
+    GatewayTimeoutError:
+      description: An external service did not respond in time

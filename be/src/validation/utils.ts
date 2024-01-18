@@ -3,15 +3,6 @@ import { MonitoringAppError, STATUS } from '../utils/index.js';
 
 /**********************************************************************************/
 
-export type PossibleColors = 'green' | 'orange' | 'red';
-export const possibleColors = new Set<PossibleColors>([
-  'green',
-  'orange',
-  'red'
-]);
-
-/**********************************************************************************/
-
 export const validateEmptyObject = (name: string, obj: unknown) => {
   const res = Zod.object({}).strict(name).safeParse(obj);
 

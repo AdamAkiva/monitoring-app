@@ -1,5 +1,11 @@
 import type { DatabaseHandler } from '../db/index.js';
-import type { Mode, NextFunction, Request, Response } from '../types/index.js';
+import type {
+  Mode,
+  NextFunction,
+  Request,
+  Response,
+  ServiceData
+} from '../types/index.js';
 import {
   MonitoringAppError,
   STATUS,
@@ -50,7 +56,7 @@ export const healthCheck = (isReadyCallback: () => Promise<string>) => {
 
 export const attachContext = (
   db: DatabaseHandler,
-  monitorMap: Map<string, number>
+  monitorMap: Map<string, ServiceData>
 ) => {
   return (req: Request, _: Response, next: NextFunction) => {
     req.monitoringApp = {

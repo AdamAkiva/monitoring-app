@@ -1,5 +1,5 @@
 import type { DatabaseHandler } from '../db/index.js';
-import type { HttpLogger } from './index.js';
+import type { HttpLogger, ServiceData } from './index.js';
 
 /**********************************************************************************/
 
@@ -10,7 +10,7 @@ declare global {
     export interface Request {
       monitoringApp: {
         db: DatabaseHandler;
-        monitorMap: Map<string, number>;
+        monitorMap: Map<string, ServiceData>;
         logger: HttpLogger['logger'];
       };
     }

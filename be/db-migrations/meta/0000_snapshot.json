@@ -1,11 +1,11 @@
 {
-  "id": "2cc966e1-dd73-4ba7-961d-60e4ecbb082b",
+  "id": "e5bb9978-5687-4e81-bcb8-b3037349b9d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "thresholds": {
-      "name": "thresholds",
+    "services": {
+      "name": "services",
       "schema": "",
       "columns": {
         "id": {
@@ -15,74 +15,14 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "website_id": {
-          "name": "website_id",
-          "type": "uuid",
+        "name": {
+          "name": "name",
+          "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
         },
-        "color": {
-          "name": "color",
-          "type": "color",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "threshold": {
-          "name": "threshold",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "thresholds_website_id_idx": {
-          "name": "thresholds_website_id_idx",
-          "columns": [
-            "website_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "thresholds_website_id_websites_id_fk": {
-          "name": "thresholds_website_id_websites_id_fk",
-          "tableFrom": "thresholds",
-          "tableTo": "websites",
-          "columnsFrom": [
-            "website_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "website_color_unique_constraint": {
-          "name": "website_color_unique_constraint",
-          "nullsNotDistinct": false,
-          "columns": [
-            "website_id",
-            "color"
-          ]
-        }
-      }
-    },
-    "websites": {
-      "name": "websites",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "url": {
-          "name": "url",
+        "uri": {
+          "name": "uri",
           "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
@@ -112,14 +52,78 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "websites_url_unique": {
-          "name": "websites_url_unique",
+        "services_name_unique": {
+          "name": "services_name_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "url"
+            "name"
+          ]
+        },
+        "services_uri_unique": {
+          "name": "services_uri_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "uri"
           ]
         }
       }
+    },
+    "thresholds": {
+      "name": "thresholds",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "service_id": {
+          "name": "service_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lower_limit": {
+          "name": "lower_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "upper_limit": {
+          "name": "upper_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "thresholds_service_id_idx": {
+          "name": "thresholds_service_id_idx",
+          "columns": [
+            "service_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "thresholds_service_id_services_id_fk": {
+          "name": "thresholds_service_id_services_id_fk",
+          "tableFrom": "thresholds",
+          "tableTo": "services",
+          "columnsFrom": [
+            "service_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
   "enums": {

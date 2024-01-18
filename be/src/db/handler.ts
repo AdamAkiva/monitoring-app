@@ -49,7 +49,7 @@ export default class DatabaseHandler {
     this._handler = drizzle(this._conn, { schema: schema });
 
     this._models = {
-      websiteModel: schema.websiteModel,
+      serviceModel: schema.serviceModel,
       thresholdModel: schema.thresholdModel
     };
   }

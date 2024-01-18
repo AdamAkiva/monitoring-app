@@ -1,5 +1,5 @@
 import { DatabaseHandler } from '../db/index.js';
-import { websiteRouter } from '../routes/website.js';
+import { serviceRouter } from '../routes/service.js';
 import {
   compress,
   cors,
@@ -8,7 +8,8 @@ import {
   sql,
   type Application,
   type Mode,
-  type Server
+  type Server,
+  type ServiceData
 } from '../types/index.js';
 import { getEnv, logger } from '../utils/index.js';
 import WebSocketServer from './websocket.js';
@@ -50,7 +51,7 @@ export default class HttpServer {
         'HEAD',
         'GET',
         'POST',
-        'PUT',
+        'PATCH',
         'DELETE',
         'OPTIONS'
       ]);
@@ -173,7 +174,7 @@ export default class HttpServer {
     app: Application;
     db: DatabaseHandler;
     routes: { api: string; health: string };
-    monitorMap: Map<string, number>;
+    monitorMap: Map<string, ServiceData>;
   }) => {
     const {
       mode,
@@ -207,7 +208,7 @@ export default class HttpServer {
     app.use(
       apiRoute,
       Middlewares.attachContext(db, monitorMap),
-      websiteRouter,
+      serviceRouter,
       Middlewares.handleMissedRoutes,
       Middlewares.errorHandler
     );
@@ -269,18 +270,20 @@ export default class HttpServer {
     db: DatabaseHandler
   ) => {
     const handler = db.getHandler();
-    const { websiteModel } = db.getModels();
+    const { serviceModel } = db.getModels();
 
-    const websites = await handler
+    const services = await handler
       .select({
-        url: websiteModel.url,
-        interval: websiteModel.monitorInterval
+        id: serviceModel.id,
+        name: serviceModel.name,
+        uri: serviceModel.uri,
+        interval: serviceModel.monitorInterval
       })
-      .from(websiteModel);
+      .from(serviceModel);
 
-    return new Map<string, number>(
-      websites.map(({ url, interval }) => {
-        return [url, interval];
+    return new Map<string, ServiceData>(
+      services.map(({ id, name, uri, interval }) => {
+        return [id, { name: name, uri: uri, interval: interval }];
       })
     );
   };

@@ -1,5 +1,5 @@
-import * as WebsiteController from './website.js';
+import * as ServiceController from './service.js';
 
 /**********************************************************************************/
 
-export { WebsiteController };
+export { ServiceController };

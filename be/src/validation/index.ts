@@ -1,5 +1,5 @@
-import * as WebsiteValidator from './website.js';
+import * as ServiceValidator from './service.js';
 
 /**********************************************************************************/
 
-export { WebsiteValidator };
+export { ServiceValidator };

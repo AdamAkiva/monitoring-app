@@ -27,7 +27,7 @@ import express, {
   type Request,
   type Response
 } from 'express';
-import ky from 'ky';
+import ky, { type Options as KyOptions } from 'ky';
 import { pinoHttp, type HttpLogger } from 'pino-http';
 import postgres from 'postgres';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -39,6 +39,7 @@ export type Mode = 'development' | 'production' | 'test';
 
 export type UnknownObject = { [key: string]: unknown };
 export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
+export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
 
 export type EnvironmentVariables = {
   mode: Mode;
@@ -59,13 +60,16 @@ export type ResolvedValue<T> = T extends (...args: any) => any
 
 /**********************************************************************************/
 
-export type Website = {
+export type ServiceData = { name: string; uri: string; interval: number };
+
+export type Service = {
   id: string;
-  url: string;
+  name: string;
+  uri: string;
   monitorInterval: number;
   thresholds: {
-    color: string;
-    limit: number;
+    lowerLimit: number;
+    upperLimit: number;
   }[];
 };
 
@@ -105,6 +109,7 @@ export {
   Zod,
   type Application,
   type HttpLogger,
+  type KyOptions,
   type NextFunction,
   type Request,
   type Response,

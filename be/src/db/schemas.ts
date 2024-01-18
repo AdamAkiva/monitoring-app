@@ -10,7 +10,6 @@ import {
   pgEnum,
   pgTable,
   timestamp,
-  unique,
   uuid,
   varchar
 } from 'drizzle-orm/pg-core';
@@ -42,19 +41,19 @@ type UpdateEntity<T> = Partial<Omit<T, 'createdAt'>> & { id: string };
 
 /**********************************************************************************/
 
-export type DWebsite = InferSelectModel<typeof websiteModel>;
+export type DService = InferSelectModel<typeof serviceModel>;
 export type DThreshold = InferSelectModel<typeof thresholdModel>;
 
 /**********************************************************************************/
 
-export type CreateWebsite = CreateEntity<InferInsertModel<typeof websiteModel>>;
+export type CreateService = CreateEntity<InferInsertModel<typeof serviceModel>>;
 export type CreateThreshold = CreateEntity<
   InferInsertModel<typeof thresholdModel>
 >;
 
 /**********************************************************************************/
 
-export type UpdateWebsite = UpdateEntity<CreateWebsite>;
+export type UpdateService = UpdateEntity<CreateService>;
 export type UpdateThreshold = UpdateEntity<CreateThreshold>;
 
 /**********************************************************************************/
@@ -64,9 +63,10 @@ export const colorEnum = pgEnum('color', ['green', 'orange', 'red']);
 /********************************* Entities ***************************************/
 /**********************************************************************************/
 
-export const websiteModel = pgTable('websites', {
+export const serviceModel = pgTable('services', {
   id: uuid('id').primaryKey().defaultRandom(),
-  url: varchar('url', { length: 2048 }).unique().notNull(),
+  name: varchar('name', { length: 2048 }).unique().notNull(),
+  uri: varchar('uri', { length: 2048 }).unique().notNull(),
   monitorInterval: integer('monitor_interval').notNull(),
   createdAt: timestamp('created_at', {
     mode: 'string',
@@ -88,24 +88,20 @@ export const thresholdModel = pgTable(
   'thresholds',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    websiteId: uuid('website_id')
+    serviceId: uuid('service_id')
       .references(
         () => {
-          return websiteModel.id;
+          return serviceModel.id;
         },
         { onDelete: 'cascade', onUpdate: 'no action' }
       )
       .notNull(),
-    color: colorEnum('color').notNull(),
-    limit: integer('threshold').notNull()
+    lowerLimit: integer('lower_limit').notNull(),
+    upperLimit: integer('upper_limit').notNull()
   },
   (table) => {
     return {
-      websiteColorUnique: unique('website_color_unique_constraint').on(
-        table.websiteId,
-        table.color
-      ),
-      websiteIdIdx: index('thresholds_website_id_idx').on(table.websiteId)
+      serviceIdIdx: index('thresholds_service_id_idx').on(table.serviceId)
     };
   }
 );

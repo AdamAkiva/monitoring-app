@@ -9,47 +9,85 @@
  * ---------------------------------------------------------------
  */
 
-export interface WebsiteCreationObj {
+export interface ServiceCreationObj {
   /**
-   * @format url
+   * The name for the monitored service. Defaults to uri if not supplied
+   * @example "Google"
+   */
+  name?: string;
+  /**
+   * @format uri
    * @example "https://google.com"
    */
-  url: string;
+  uri: string;
   /** The interval of every latency check */
   monitorInterval: number;
   /** @minItems 1 */
   thresholds: {
-    color: 'green' | 'orange' | 'red';
-    limit: number;
+    /**
+     * Milliseconds representing the lower limit for the threshold check
+     * @example 20
+     */
+    lowerLimit: number;
+    /**
+     * Milliseconds representing the upper limit for the threshold check
+     * @example 50
+     */
+    upperLimit: number;
   }[];
 }
 
-export interface WebsiteUpdatesObj {
+export interface ServiceUpdatesObj {
+  /** @example "Google" */
+  name?: string;
   /**
-   * @format url
+   * @format uri
    * @example "https://google.com"
    */
-  url?: string;
+  uri?: string;
   /** The interval of every latency check */
   monitorInterval?: number;
   /** @minItems 1 */
   thresholds?: {
-    color: 'green' | 'orange' | 'red';
-    limit: number;
+    /**
+     * Milliseconds representing the lower limit for the threshold check
+     * @example 20
+     */
+    lowerLimit: number;
+    /**
+     * Milliseconds representing the upper limit for the threshold check
+     * @example 50
+     */
+    upperLimit: number;
   }[];
 }
 
-export interface Website {
+export interface Service {
   /**
-   * @format url
+   * @format uuid
+   * @example "adb3271f-94dc-4169-80e9-3d4c8a90201f"
+   */
+  id: string;
+  /** @example "Google" */
+  name: string;
+  /**
+   * @format uri
    * @example "https://google.com"
    */
-  url: string;
+  uri: string;
   /** The interval of every latency check */
   monitorInterval: number;
   /** @minItems 1 */
   thresholds: {
-    color: 'green' | 'orange' | 'red';
-    limit: number;
+    /**
+     * Milliseconds representing the lower limit for the threshold check
+     * @example 20
+     */
+    lowerLimit: number;
+    /**
+     * Milliseconds representing the upper limit for the threshold check
+     * @example 50
+     */
+    upperLimit: number;
   }[];
 }

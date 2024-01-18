@@ -30,7 +30,7 @@ export const filterNullAndUndefined = <T>(
 
 export const sanitizeError = (
   err: unknown,
-  entity?: { type: 'Website'; name: string }
+  entity?: { type: 'Service'; name: string }
 ) => {
   if (err instanceof pg.PostgresError) {
     switch (err.code) {

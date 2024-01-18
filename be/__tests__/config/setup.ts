@@ -30,7 +30,7 @@ export const setup = async ({ provide }: any) => {
     const models = getModels();
 
     /* eslint-disable drizzle/enforce-delete-with-where */
-    await handler.delete(models.websiteModel);
+    await handler.delete(models.serviceModel);
     await handler.delete(models.thresholdModel);
     /* eslint-enable drizzle/enforce-delete-with-where */
 
@@ -53,7 +53,7 @@ export const getTestEnv = () => {
       apiRoute: process.env.API_ROUTE!,
       healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!
     },
-    db: process.env.DB_TEST_URI!
+    db: process.env.TEST_DB_URI!
   };
 };
 
@@ -92,6 +92,6 @@ const checkMissingEnvVariables = () => {
     ['TEST_SERVER_PORT', `Missing 'TEST_SERVER_PORT', env variable`],
     ['API_ROUTE', `Missing 'API_ROUTE', env variable`],
     ['HEALTH_CHECK_ROUTE', `Missing 'HEALTH_CHECK_ROUTE', env variable`],
-    ['DB_TEST_URI', `Missing 'DB_TEST_URI', env variable`]
+    ['TEST_DB_URI', `Missing 'TEST_DB_URI', env variable`]
   ]);
 };

@@ -1,5 +1,5 @@
-import * as WebsiteService from './website.js';
+import * as ServiceLayer from './service.js';
 
 /**********************************************************************************/
 
-export { WebsiteService };
+export { ServiceLayer };
