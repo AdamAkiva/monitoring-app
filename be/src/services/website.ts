@@ -34,7 +34,7 @@ export const createOne = async (
   website: WebsiteCreateOneValidationData
 ): Promise<Website> => {
   try {
-    const { db } = req.monitoringApp;
+    const { db, monitorMap } = req.monitoringApp;
     const handler = db.getHandler();
     const { websiteModel, thresholdModel } = db.getModels();
 
@@ -55,6 +55,8 @@ export const createOne = async (
         };
       })
     );
+
+    monitorMap.set(website.url, website.monitorInterval);
 
     return {
       id: websiteId,
@@ -85,7 +87,7 @@ export const updateOne = async (
           transaction: transaction
         }),
         updateWebsite({
-          db: db,
+          req: req,
           websiteUpdates: websiteUpdates,
           websiteId: websiteId,
           transaction: transaction
@@ -123,7 +125,7 @@ export const deleteOne = async (
   id: WebsiteDeleteOneValidationData
 ): Promise<string> => {
   try {
-    const { db } = req.monitoringApp;
+    const { db, monitorMap } = req.monitoringApp;
     const handler = db.getHandler();
     const { websiteModel } = db.getModels();
 
@@ -134,6 +136,8 @@ export const deleteOne = async (
         id: websiteModel.id
       });
     if (deletedWebsites.length) {
+      monitorMap.delete(deletedWebsites[0].id);
+
       return deletedWebsites[0].id;
     }
 
@@ -212,22 +216,30 @@ const findWebsiteToUpdate = async (params: {
 };
 
 const updateWebsite = async (params: {
-  db: DatabaseHandler;
+  req: Request;
   websiteUpdates: Omit<WebsiteUpdateOneValidationData, 'id' | 'thresholds'>;
   websiteId: string;
   transaction: Transaction;
 }) => {
-  const { db, websiteUpdates, websiteId, transaction } = params;
+  const { req, websiteUpdates, websiteId, transaction } = params;
+  const { db, monitorMap } = req.monitoringApp;
   const { websiteModel } = db.getModels();
 
   if (!Object.keys(websiteUpdates).length) {
     return await Promise.resolve();
   }
 
-  await transaction
+  const websites = await transaction
     .update(websiteModel)
     .set(websiteUpdates)
-    .where(eq(websiteModel.id, websiteId));
+    .where(eq(websiteModel.id, websiteId))
+    .returning({
+      url: websiteModel.url,
+      interval: websiteModel.monitorInterval
+    });
+  if (websites.length) {
+    monitorMap.set(websites[0].url, websites[0].interval);
+  }
 };
 
 const updateWebsiteThresholds = async (params: {
