@@ -48,11 +48,15 @@ export const healthCheck = (isReadyCallback: () => Promise<string>) => {
   };
 };
 
-export const attachContext = (db: DatabaseHandler) => {
+export const attachContext = (
+  db: DatabaseHandler,
+  monitorMap: Map<string, number>
+) => {
   return (req: Request, _: Response, next: NextFunction) => {
     req.monitoringApp = {
-      logger: logMiddleware.logger,
-      db: db
+      db: db,
+      monitorMap: monitorMap,
+      logger: logMiddleware.logger
     };
 
     return next();

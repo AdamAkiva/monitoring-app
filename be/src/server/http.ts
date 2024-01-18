@@ -11,6 +11,7 @@ import {
   type Server
 } from '../types/index.js';
 import { getEnv, logger } from '../utils/index.js';
+import WebSocketServer from './websocket.js';
 
 import * as Middlewares from './middleware.js';
 
@@ -30,6 +31,7 @@ export default class HttpServer {
 
     let db: DatabaseHandler | null = null;
     let server: Server | null = null;
+    let wss: WebSocketServer | null = null;
     try {
       db = new DatabaseHandler({
         mode: mode,
@@ -68,17 +70,22 @@ export default class HttpServer {
           allowedMethods: allowedMethods
         });
       }
+
+      const monitorMap = await HttpServer._setupMonitoringApplications(db);
       await HttpServer._attachRoutes({
         mode: mode,
         app: app,
         db: db,
-        routes: routes
+        routes: routes,
+        monitorMap: monitorMap
       });
+
+      wss = new WebSocketServer(server, monitorMap);
     } catch (err) {
       if (err instanceof Error) {
         logger.error(err, 'Error during server initialization');
       }
-      await Promise.all([db?.close(), server?.close()]);
+      await Promise.all([db?.close(), wss?.close(), server?.close()]);
       process.exitCode = 1;
 
       // Even though the global event handlers are not yet set-up the docs say:
@@ -90,7 +97,7 @@ export default class HttpServer {
 
     // After this point, there are handlers responsible for gracefully shutting
     // down all of the resources used by the server
-    HttpServer._attachEventHandlers(server, db);
+    HttpServer._attachEventHandlers({ server: server, wss: wss, db: db });
 
     return new HttpServer(server, db);
   };
@@ -166,11 +173,13 @@ export default class HttpServer {
     app: Application;
     db: DatabaseHandler;
     routes: { api: string; health: string };
+    monitorMap: Map<string, number>;
   }) => {
     const {
       mode,
       app,
       db,
+      monitorMap,
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
@@ -197,7 +206,7 @@ export default class HttpServer {
     app.use(Middlewares.attachLogMiddleware(mode));
     app.use(
       apiRoute,
-      Middlewares.attachContext(db),
+      Middlewares.attachContext(db, monitorMap),
       websiteRouter,
       Middlewares.handleMissedRoutes,
       Middlewares.errorHandler
@@ -231,14 +240,18 @@ export default class HttpServer {
     app.use(`${apiRoute}/api-docs`, serve, setup(swaggerDoc));
   };
 
-  private static readonly _attachEventHandlers = (
-    server: Server,
-    db: DatabaseHandler
-  ) => {
+  private static readonly _attachEventHandlers = (params: {
+    server: Server;
+    db: DatabaseHandler;
+    wss: WebSocketServer;
+  }) => {
+    const { server, db, wss } = params;
+
     server.on('error', (err) => {
       logger.error(err, 'HTTP Server error');
     });
     server.once('close', async () => {
+      wss.close();
       await Promise.all([db.close()]);
       // Graceful shutdown
       process.exitCode = 0;
@@ -250,6 +263,26 @@ export default class HttpServer {
     process.once('SIGTERM', () => {
       server.close();
     });
+  };
+
+  private static readonly _setupMonitoringApplications = async (
+    db: DatabaseHandler
+  ) => {
+    const handler = db.getHandler();
+    const { websiteModel } = db.getModels();
+
+    const websites = await handler
+      .select({
+        url: websiteModel.url,
+        interval: websiteModel.monitorInterval
+      })
+      .from(websiteModel);
+
+    return new Map<string, number>(
+      websites.map(({ url, interval }) => {
+        return [url, interval];
+      })
+    );
   };
 
   /********************************************************************************/
