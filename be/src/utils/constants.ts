@@ -14,10 +14,6 @@ export const STATUS = {
     CODE: 400,
     MSG: 'Bad request'
   },
-  UNAUTHORIZED: {
-    CODE: 401,
-    MSG: 'Unauthorized'
-  },
   FORBIDDEN: {
     CODE: 403,
     MSG: 'Forbidden'
@@ -40,14 +36,6 @@ export const STATUS = {
   },
   SERVER_ERROR: {
     CODE: 500,
-    MSG: 'Server error, please try again'
-  },
-  BAD_GATEWAY: {
-    CODE: 502,
-    MSG: 'Server error, please try again'
-  },
-  SERVICE_UNAVAILABLE: {
-    CODE: 503,
     MSG: 'Server error, please try again'
   },
   GATEWAY_TIMEOUT: {
