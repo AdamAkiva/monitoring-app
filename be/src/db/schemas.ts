@@ -59,7 +59,7 @@ export type UpdateThreshold = UpdateEntity<CreateThreshold>;
 
 /**********************************************************************************/
 
-const colorEnum = pgEnum('color', ['green', 'orange', 'red']);
+export const colorEnum = pgEnum('color', ['green', 'orange', 'red']);
 
 /********************************* Entities ***************************************/
 /**********************************************************************************/
