@@ -27,8 +27,10 @@ import express, {
   type Request,
   type Response
 } from 'express';
+import ky from 'ky';
 import { pinoHttp, type HttpLogger } from 'pino-http';
 import postgres from 'postgres';
+import { WebSocket, WebSocketServer } from 'ws';
 import { z as Zod } from 'zod';
 
 /**********************************************************************************/
@@ -84,6 +86,7 @@ export {
   isNotNull,
   isNull,
   json,
+  ky,
   machine,
   ne,
   notInArray,
@@ -97,6 +100,8 @@ export {
   sql,
   URL,
   version,
+  WebSocket,
+  WebSocketServer,
   Zod,
   type Application,
   type HttpLogger,

@@ -10,6 +10,7 @@ declare global {
     export interface Request {
       monitoringApp: {
         db: DatabaseHandler;
+        monitorMap: Map<string, number>;
         logger: HttpLogger['logger'];
       };
     }
