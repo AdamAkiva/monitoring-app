@@ -16,12 +16,14 @@
 !*.ts
 !.eslintrc.cjs
 !loader.js
+!*.sql
 
 # Etc
 !*.json
 !*.sh
 !*.md
 !*.yml
+!*.yaml
 !Dockerfile
 !.gitignore
 
