@@ -6,15 +6,16 @@
   "scripts": {
     "start:dev": "vite",
     "test": "printf 'No tests exist' && exit 1",
-    "lint": "npx tsc --project ./tsconfig.json --noEmit && npx eslint \"src/**/*.tsx\"",
+    "lint": "npx tsc --project ./tsconfig.json --noEmit && npx eslint \"src/**/*.{ts,tsx}\"",
     "build": "npx eslint './src/**/*.tsx' && vite build",
     "check-global-updates": "npx ncu -g",
     "check-local-updates": "npx ncu",
     "commit-local-updates": "npx ncu -u",
-    "check-code-deps": "npx depcheck --ignores=@swc/core,@vitest/coverage-v8,pino-pretty,prettier,ts-node",
-    "check-cir-deps": "npx dpdm --no-tree --transform --exit-code circular:1 \"src/**/*.ts\""
+    "check-code-deps": "npx depcheck --ignores=prettier",
+    "check-cir-deps": "npx dpdm --no-tree --transform --exit-code circular:1 \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "ky": "~1.2.0",
     "react": "~18.2.0",
     "react-dom": "~18.2.0"
   },

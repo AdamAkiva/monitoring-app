@@ -3,18 +3,20 @@ module.exports = {
   env: { browser: true, es2020: true },
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
+  settings: {
+    react: { version: 'detect' }
+  },
   overrides: [
     {
       files: ['./src/**/*.ts', './src/**/*.tsx'],
-      ignorePatterns: ['build'],
       extends: [
         'eslint:recommended',
         'plugin:security/recommended-legacy',
-        'plugin:@typescript-eslint/strict-type-checked',
-        'plugin:@typescript-eslint/stylistic-type-checked',
         'plugin:react/recommended',
         'plugin:react/jsx-runtime',
         'plugin:react-hooks/recommended',
+        'plugin:@typescript-eslint/strict-type-checked',
+        'plugin:@typescript-eslint/stylistic-type-checked',
         'prettier'
       ],
       parserOptions: {

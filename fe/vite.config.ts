@@ -10,7 +10,7 @@ import { defineConfig, type UserConfig } from 'vite';
 export default defineConfig(({ command }): UserConfig => {
   const sharedConfig = {
     root: './',
-    envPrefix: 'MONITORING_APP',
+    envPrefix: 'MONITORING_APP_',
     publicDir: './public',
     plugins: [react()],
     resolve: {
