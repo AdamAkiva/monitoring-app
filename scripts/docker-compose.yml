@@ -53,7 +53,7 @@ services:
 
   ##################################################################################
 
-  monitoring-app-dev:
+  monitoring-app-be-dev:
     hostname: monitoring-app-be-dev
     container_name: monitoring-app-be-dev
     restart: unless-stopped
@@ -90,6 +90,46 @@ services:
         [
           "CMD-SHELL",
           "curl -s -o /dev/null -w '%{http_code}' http://localhost:4500/health | grep -q '204'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 45s
+    depends_on:
+      monitoring-app-pg-dev:
+        condition: service_healthy
+      monitoring-app-pg-test:
+        condition: service_healthy
+    command: /bin/sh -c "npm install --ddd && npm run start:dev"
+
+  monitoring-app-fe-dev:
+    hostname: monitoring-app-fe-dev
+    container_name: monitoring-app-fe-dev
+    restart: unless-stopped
+    build:
+      context: ../fe
+      dockerfile: Dockerfile
+      target: fe-dev
+    user: ${HOST_UID}:${HOST_GID}
+    environment:
+      - CLIENT_PORT=4502
+      - NODE_ENV=development
+    volumes:
+      - ../fe:/home/node:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 20m
+        max-file: 5
+        compress: "true"
+    stop_grace_period: 2s
+    ports:
+      - "4502:4502"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -o /dev/null -w '%{http_code}' http://localhost:4502 | grep -q '200'"
         ]
       interval: 10s
       timeout: 3s

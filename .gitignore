@@ -14,6 +14,10 @@
 
 # Exclude source files
 !*.ts
+!*.tsx
+!*.css
+!*.svg
+!index.html
 !.eslintrc.cjs
 !loader.js
 !*.sql
