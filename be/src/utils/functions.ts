@@ -36,7 +36,7 @@ export const sanitizeError = (
     switch (err.code) {
       case ERR_CODES.UNIQUE_VIOLATION:
         return new MonitoringAppError(
-          `${entity!.type} '${entity!.name}' already exists'`,
+          `${entity?.type ?? 'Unknown'} '${entity?.name ?? 'unknown'}' already exists'`,
           STATUS.CONFLICT.CODE
         );
       default:

@@ -7,6 +7,7 @@ import {
   express,
   sql,
   type Application,
+  type JsonObject,
   type Mode,
   type Server,
   type ServiceData
@@ -14,6 +15,7 @@ import {
 import { getEnv, logger } from '../utils/index.js';
 import WebSocketServer from './websocket.js';
 
+import type {} from 'swagger-ui-express';
 import * as Middlewares from './middleware.js';
 
 /**********************************************************************************/
@@ -236,7 +238,7 @@ export default class HttpServer {
         ),
         'utf-8'
       )
-    );
+    ) as JsonObject;
 
     app.use(`${apiRoute}/api-docs`, serve, setup(swaggerDoc));
   };

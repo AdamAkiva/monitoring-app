@@ -23,17 +23,27 @@ import express, {
   json,
   Router,
   type Application,
+  type Request as ExpressRequest,
   type NextFunction,
-  type Request,
   type Response
 } from 'express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 import ky, { type Options as KyOptions } from 'ky';
 import { pinoHttp, type HttpLogger } from 'pino-http';
 import postgres from 'postgres';
+import type { JsonObject } from 'swagger-ui-express';
 import { WebSocket, WebSocketServer } from 'ws';
 import { z as Zod } from 'zod';
 
 /**********************************************************************************/
+
+export type Request = ExpressRequest<
+  ParamsDictionary,
+  UnknownObject,
+  UnknownObject,
+  qs.ParsedQs,
+  UnknownObject
+>;
 
 export type Mode = 'development' | 'production' | 'test';
 
@@ -109,9 +119,9 @@ export {
   Zod,
   type Application,
   type HttpLogger,
+  type JsonObject,
   type KyOptions,
   type NextFunction,
-  type Request,
   type Response,
   type Server
 };

@@ -13,6 +13,7 @@ export const getEnv = () => {
   checkRuntimeEnv(mode);
   checkEnvVariables(mode);
 
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
   env = {
     mode: mode,
     server: {
@@ -22,11 +23,12 @@ export const getEnv = () => {
       healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!,
       allowedOrigins:
         typeof process.env.ALLOWED_ORIGINS === 'string' && mode !== 'production'
-          ? process.env.ALLOWED_ORIGINS!
+          ? process.env.ALLOWED_ORIGINS
           : process.env.ALLOWED_ORIGINS!.split(',')
     },
     db: process.env.DB_URI!
   };
+  /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
   return env;
 };

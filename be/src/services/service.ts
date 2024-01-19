@@ -162,7 +162,7 @@ export const deleteOne = async (
 
 /**********************************************************************************/
 
-const readServices = async (db: DatabaseHandler, filter?: SQL<unknown>) => {
+const readServices = async (db: DatabaseHandler, filter?: SQL) => {
   const handler = db.getHandler();
   const { serviceModel, thresholdModel } = db.getModels();
 
@@ -206,6 +206,8 @@ const sanitizeServices = (serviceEntires: DatabaseServices) => {
     })
   );
   serviceEntires.forEach(({ id, lowerLimit, upperLimit }) => {
+    // It was assigned in the code section above, it has to be defined here
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     servicesMap.get(id)!.thresholds.push({
       lowerLimit: lowerLimit,
       upperLimit: upperLimit
