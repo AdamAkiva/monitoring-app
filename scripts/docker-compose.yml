@@ -67,7 +67,7 @@ services:
       - TEST_SERVER_PORT=4501
       - SERVER_DEBUG_PORT=9229
       - SERVER_URL=http://localhost
-      - API_ROUTE=api/v0
+      - API_ROUTE=v0/api
       - HEALTH_CHECK_ROUTE=health
       - ALLOWED_ORIGINS=http://localhost:4502
       - DB_URI=postgres://admin:admin@monitoring-app-pg-dev:5432/monitoring-app-dev
@@ -113,6 +113,7 @@ services:
     user: ${HOST_UID}:${HOST_GID}
     environment:
       - CLIENT_PORT=4502
+      - MONITORING_APP_SERVER_URL=http://localhost:4500/v0/api
       - NODE_ENV=development
     volumes:
       - ../fe:/home/node:rw
