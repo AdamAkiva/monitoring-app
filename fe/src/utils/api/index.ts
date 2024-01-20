@@ -1,13 +1,10 @@
+import HttpInstance, { httpInstance } from './instance.ts';
 import {
-  HttpInstance,
   createService,
   deleteService,
   fetchServices,
-  httpInstance,
   updateService
-} from './api';
-import { getEnvValue, getRuntimeMode } from './env.ts';
-import { uppercaseFirstLetter } from './functions.ts';
+} from './service.ts';
 
 /**********************************************************************************/
 
@@ -16,9 +13,6 @@ export {
   createService,
   deleteService,
   fetchServices,
-  getEnvValue,
-  getRuntimeMode,
   httpInstance,
-  updateService,
-  uppercaseFirstLetter
+  updateService
 };

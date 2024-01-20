@@ -1,0 +1,28 @@
+.header-information {
+  display: flex;
+  flex: 50%;
+  margin: 2px;
+}
+
+.header-information-row {
+  display: flex;
+  flex-direction: column;
+  flex: 100%;
+}
+
+.header-information-key {
+  flex: 33%;
+  text-align: right;
+  margin: 2px;
+  padding: 30px 20px 0 0;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.header-information-value {
+  flex: 33%;
+  text-align: left;
+  margin: 2px;
+  padding: 30px 0 0 20px;
+  font-size: 1.1em;
+}

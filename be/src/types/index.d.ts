@@ -1,5 +1,6 @@
 import type { DatabaseHandler } from '../db/index.js';
-import type { HttpLogger, ServiceData } from './index.js';
+import type { WebSocketServer } from '../server/index.js';
+import type { HttpLogger } from './index.js';
 
 /**********************************************************************************/
 
@@ -10,7 +11,7 @@ declare global {
     export interface Request {
       monitoringApp: {
         db: DatabaseHandler;
-        monitorMap: Map<string, ServiceData>;
+        wss: WebSocketServer;
         logger: HttpLogger['logger'];
       };
     }

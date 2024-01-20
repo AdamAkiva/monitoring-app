@@ -1,10 +1,10 @@
 import { ky, type KyOptions, type RequiredFields } from '@/types';
 
-import { getEnvValue } from './env.ts';
+import { getEnvValue } from '../env.ts';
 
 /**********************************************************************************/
 
-export default class HttpRequest {
+export default class HttpInstance {
   private readonly _handler;
   private readonly _url;
 
@@ -13,15 +13,16 @@ export default class HttpRequest {
       timeout: 8_000,
       throwHttpErrors: true,
       cache: 'default',
-      retry: 4
+      retry: 2
     });
     this._url = url;
   }
 
   public readonly sendRequest = async <ReturnType = unknown>(
+    route: string,
     options: RequiredFields<KyOptions, 'method'> = { method: 'get' }
   ) => {
-    const res = await this._handler(this._url, options);
+    const res = await this._handler(`${this._url}/${route}`, options);
 
     const contentType = res.headers.get('content-type');
     if (!contentType) {
@@ -48,4 +49,4 @@ export default class HttpRequest {
   };
 }
 
-export const httpInstance = new HttpRequest(getEnvValue('SERVER_URL'));
+export const httpInstance = new HttpInstance(getEnvValue('SERVER_URL'));

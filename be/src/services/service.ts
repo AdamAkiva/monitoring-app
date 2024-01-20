@@ -34,7 +34,7 @@ export const createOne = async (
   service: ServiceCreateOneValidationData
 ): Promise<Service> => {
   try {
-    const { db, monitorMap } = req.monitoringApp;
+    const { db, wss } = req.monitoringApp;
     const handler = db.getHandler();
     const { serviceModel, thresholdModel } = db.getModels();
 
@@ -57,7 +57,7 @@ export const createOne = async (
       })
     );
 
-    monitorMap.set(serviceId, {
+    wss.upsertMonitoredService(serviceId, {
       name: service.name,
       uri: service.uri,
       interval: service.monitorInterval
@@ -138,7 +138,7 @@ export const deleteOne = async (
   id: ServiceDeleteOneValidationData
 ): Promise<string> => {
   try {
-    const { db, monitorMap } = req.monitoringApp;
+    const { db, wss } = req.monitoringApp;
     const handler = db.getHandler();
     const { serviceModel } = db.getModels();
 
@@ -149,7 +149,7 @@ export const deleteOne = async (
         id: serviceModel.id
       });
     if (deletedServices.length) {
-      monitorMap.delete(deletedServices[0].id);
+      wss.deleteMonitoredService(deletedServices[0].id);
 
       return deletedServices[0].id;
     }
@@ -244,7 +244,7 @@ const updateService = async (params: {
   transaction: Transaction;
 }) => {
   const { req, serviceUpdates, serviceId, transaction } = params;
-  const { db, monitorMap } = req.monitoringApp;
+  const { db, wss } = req.monitoringApp;
   const { serviceModel } = db.getModels();
 
   if (!Object.keys(serviceUpdates).length) {
@@ -261,7 +261,7 @@ const updateService = async (params: {
       interval: serviceModel.monitorInterval
     });
   if (services.length) {
-    monitorMap.set(serviceId, {
+    wss.upsertMonitoredService(serviceId, {
       name: services[0].name,
       uri: services[0].uri,
       interval: services[0].interval

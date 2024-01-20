@@ -22,6 +22,7 @@ import * as Middlewares from './middleware.js';
 
 export default class HttpServer {
   private readonly _server;
+  private readonly _wss;
   private readonly _db;
 
   public static readonly create = async (params: {
@@ -74,16 +75,17 @@ export default class HttpServer {
         });
       }
 
-      const monitorMap = await HttpServer._setupMonitoringApplications(db);
+      wss = new WebSocketServer(
+        server,
+        await HttpServer._setupMonitoringApplications(db)
+      );
       await HttpServer._attachRoutes({
         mode: mode,
         app: app,
         db: db,
         routes: routes,
-        monitorMap: monitorMap
+        wss: wss
       });
-
-      wss = new WebSocketServer(server, monitorMap);
     } catch (err) {
       if (err instanceof Error) {
         logger.error(err, 'Error during server initialization');
@@ -102,7 +104,7 @@ export default class HttpServer {
     // down all of the resources used by the server
     HttpServer._attachEventHandlers({ server: server, wss: wss, db: db });
 
-    return new HttpServer(server, db);
+    return new HttpServer({ server: server, wss: wss, db: db });
   };
 
   private static readonly _attachConfigurations = (server: Server) => {
@@ -176,13 +178,13 @@ export default class HttpServer {
     app: Application;
     db: DatabaseHandler;
     routes: { api: string; health: string };
-    monitorMap: Map<string, ServiceData>;
+    wss: WebSocketServer;
   }) => {
     const {
       mode,
       app,
       db,
-      monitorMap,
+      wss,
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
@@ -209,7 +211,7 @@ export default class HttpServer {
     app.use(Middlewares.attachLogMiddleware(mode));
     app.use(
       apiRoute,
-      Middlewares.attachContext(db, monitorMap),
+      Middlewares.attachContext(db, wss),
       serviceRouter,
       Middlewares.handleMissedRoutes,
       Middlewares.errorHandler
@@ -292,14 +294,22 @@ export default class HttpServer {
 
   /********************************************************************************/
 
-  private constructor(server: Server, db: DatabaseHandler) {
+  private constructor(params: {
+    server: Server;
+    wss: WebSocketServer;
+    db: DatabaseHandler;
+  }) {
+    const { server, wss, db } = params;
+
     // When we get to this stage of the server initialization, this class handles
     // the cleanup on shutdown. Therefore remove the option to call close from
     // the returned handlers
-    const { close: __, ..._db } = db;
+    const { close: _, ...__wss } = wss;
+    const { close: __, ...__db } = db;
 
     this._server = server;
-    this._db = _db;
+    this._wss = __wss;
+    this._db = __db;
   }
 
   public readonly listen = (port: number | string) => {
@@ -319,6 +329,10 @@ export default class HttpServer {
 
   public readonly getDatabase = () => {
     return this._db;
+  };
+
+  public readonly getWebSocketServer = () => {
+    return this._wss;
   };
 
   public readonly close = () => {

@@ -1,0 +1,14 @@
+.header-thresholds {
+  flex: 50%;
+  margin: 2px;
+}
+
+.header-thresholds-section {
+  display: block;
+  text-align: center;
+  margin: 3px;
+}
+
+.header-thresholds-section b {
+  margin-left: 20px;
+}

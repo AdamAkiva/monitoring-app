@@ -1,0 +1,65 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  margin: 3px;
+}
+
+.card-header {
+  display: flex;
+  flex: 25%;
+  margin: 2px;
+  font-weight: 400;
+  font-size: 1.33em;
+  padding-top: 15px;
+}
+
+.card-header-title {
+  flex: 80%;
+  padding-top: 40px;
+  padding-left: 20px;
+}
+
+.card-header-modification {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+  flex: 15%;
+}
+
+.card-header-modification button {
+  flex: 50%;
+  background-color: white;
+  color: black;
+  padding: 12px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.card-header-modification button:hover {
+  background-color: gray;
+}
+
+.card-body {
+  display: flex;
+  align-items: center;
+  flex: 50%;
+  margin: 2px;
+  padding-left: 33px;
+}
+
+.card-body b {
+  margin-right: 10px;
+}
+
+.card-footer {
+  flex: 25%;
+  margin: 2px;
+}
+
+.card-circle {
+  margin-left: 33px;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+}

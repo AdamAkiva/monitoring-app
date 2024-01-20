@@ -23,14 +23,15 @@ export default class {
     });
     this._monitorMap = monitorMap;
 
-    this._attachEventHandlers();
-
     this._sendHttpRequest = ky.create({
       method: 'head',
       retry: 4,
       timeout: 8_000,
-      throwHttpErrors: false
+      throwHttpErrors: true
     });
+
+    this._attachEventHandlers();
+    this._scheduleMonitors();
   }
 
   private readonly _attachEventHandlers = () => {
@@ -42,49 +43,78 @@ export default class {
       socket.on('error', (err) => {
         logger.error(err, 'Socket client error');
       });
-
-      void this._setBroadcast(socket);
     });
   };
 
-  private readonly _setBroadcast = async (socket: WebSocket) => {
-    const serviceIds = Array.from(this._monitorMap.keys());
-    await Promise.all(
-      serviceIds.map(async (id) => {
-        await this._scheduleMonitor(id, socket);
-      })
-    );
+  private readonly _scheduleMonitors = () => {
+    for (const [key] of this._monitorMap) {
+      void this._scheduleMonitor(key);
+    }
   };
 
-  private readonly _scheduleMonitor = async (
-    serviceId: string,
-    socket: WebSocket
-  ) => {
-    const entry = this._monitorMap.get(serviceId);
-    if (!entry) {
+  private readonly _scheduleMonitor = async (serviceId: string) => {
+    console.log(this._monitorMap);
+    const service = this._monitorMap.get(serviceId);
+    if (!service) {
       return await Promise.resolve();
     }
 
-    const response = await this._monitorCheck(serviceId);
-    this._wss.clients.forEach((client) => {
-      if (client !== socket && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(response));
-      }
-    });
-
-    setTimeout(this._scheduleMonitor, entry.interval);
+    await this._monitorCheck(service.uri);
+    setTimeout(this._scheduleMonitor, service.interval, serviceId);
   };
 
-  private readonly _monitorCheck = async (service: string) => {
-    const startTime = performance.now();
-    const { status } = await this._sendHttpRequest.head(service);
-    const reqTime = performance.now() - startTime;
+  private readonly _monitorCheck = async (serviceUri: string) => {
+    let msg: { serviceUri: string; reqTime: number } = {
+      serviceUri: '',
+      reqTime: 0
+    };
+    try {
+      const startTime = performance.now();
+      const { status } = await this._sendHttpRequest.head(serviceUri);
+      const reqTime = performance.now() - startTime;
 
-    if (status >= 200 && status < 300) {
-      return { service: service, reqTime: reqTime };
+      if (status >= 200 && status < 300) {
+        msg = { serviceUri: serviceUri, reqTime: Number(reqTime.toFixed(2)) };
+      } else {
+        msg = { serviceUri: serviceUri, reqTime: -1 };
+      }
+    } catch (err) {
+      logger.error(err, 'Error during monitor check: ');
+
+      msg = { serviceUri: serviceUri, reqTime: -1 };
+    } finally {
+      this._sendBroadcastMessage(msg);
     }
+  };
 
-    return { service: service, reqTime: -1 };
+  private readonly _sendBroadcastMessage = (msg: {
+    serviceUri: string;
+    reqTime: number;
+  }) => {
+    this._wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(msg));
+      }
+    });
+  };
+
+  /********************************************************************************/
+
+  public readonly upsertMonitoredService = (
+    serviceId: string,
+    service: ServiceData
+  ) => {
+    this._monitorMap.set(serviceId, {
+      name: service.name,
+      uri: service.uri,
+      interval: service.interval
+    });
+
+    void this._scheduleMonitor(serviceId);
+  };
+
+  public readonly deleteMonitoredService = (serviceId: string) => {
+    this._monitorMap.delete(serviceId);
   };
 
   public readonly close = () => {
