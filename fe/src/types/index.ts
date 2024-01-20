@@ -1,5 +1,6 @@
 import ky, { type Options as KyOptions } from 'ky';
 import React, {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -13,6 +14,7 @@ import { MdEdit } from 'react-icons/md';
 
 /**********************************************************************************/
 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
 export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
 
 export type Service = {
@@ -25,6 +27,10 @@ export type Service = {
     upperLimit: number;
   }[];
 };
+export type ServiceCreation = Omit<Service, 'id'>;
+export type ServiceUpdates = Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>;
+
+export type ClickEvent = React.MouseEvent<HTMLElement>;
 
 /**********************************************************************************/
 
@@ -35,6 +41,7 @@ export {
   React,
   ReactDOM,
   ky,
+  useCallback,
   useEffect,
   useRef,
   useState,

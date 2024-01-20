@@ -1,4 +1,11 @@
-import { CiTrash, MdEdit, useState } from '@/types';
+import {
+  CiTrash,
+  MdEdit,
+  useState,
+  type Service,
+  type ServiceCreation,
+  type ServiceUpdates
+} from '@/types';
 
 import SubmitForm from './SubmitForm.tsx';
 
@@ -8,15 +15,23 @@ import './Card.css';
 
 const colors = ['#33cc33', '#ff9900', '#ff3300'];
 
+type CardProps = {
+  service: Service;
+  latency: number;
+  onCardClick: (serviceId: string) => void;
+  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+  onDeleteClick: (serviceId: string) => void;
+};
+
 /**********************************************************************************/
 
 export default function Card({
   service,
   latency,
   onCardClick,
-  submitForm,
+  onSubmitForm,
   onDeleteClick
-}) {
+}: CardProps) {
   const [showForm, setShowForm] = useState(false);
 
   const openForm = () => {
@@ -53,7 +68,7 @@ export default function Card({
     <div className="card">
       {showForm && (
         <SubmitForm
-          submitForm={submitForm}
+          onSubmitForm={onSubmitForm}
           closeForm={closeForm}
           state={service}
         />

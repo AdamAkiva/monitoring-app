@@ -1,5 +1,16 @@
-import { useEffect, useState, type Service } from '@/types';
+// TODO Resolve this
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import {
+  useCallback,
+  useEffect,
+  useState,
+  type Service,
+  type ServiceCreation,
+  type ServiceUpdates
+} from '@/types';
+import {
+  WebsocketInstance,
   createService,
   deleteService,
   fetchServices,
@@ -16,25 +27,48 @@ import './MonitoringApplication.css';
 /**********************************************************************************/
 
 export default function MonitoringApplication() {
-  const [loading, setLoading] = useState(true);
+  // TODO Need to set a loading sign for the page if loading is false value
+  const [, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | undefined>();
   const [latency, setLatency] = useState(0);
 
+  const handleCardClick = useCallback(
+    (serviceId: string) => {
+      setSelectedService(
+        services.find((service) => {
+          return serviceId === service.id;
+        })
+      );
+    },
+    [services]
+  );
+  const handleCreate = useCallback((service: ServiceCreation) => {
+    void createService({
+      serviceToCreate: service,
+      setServices: setServices,
+      setLoading: setLoading
+    });
+  }, []);
+  const handleUpdate = useCallback((serviceUpdates: ServiceUpdates) => {
+    void updateService({
+      serviceUpdates: serviceUpdates,
+      setServices: setServices,
+      setSelectedService: setSelectedService,
+      setLoading: setLoading
+    });
+  }, []);
+  const handleDelete = useCallback((serviceId: string) => {
+    void deleteService({
+      serviceId: serviceId,
+      setServices: setServices,
+      setSelectedService: setSelectedService,
+      setLoading: setLoading
+    });
+  }, []);
+
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:4500');
-    socket.addEventListener('open', () => {
-      console.log('Socket connection established');
-    });
-    socket.addEventListener('error', (e) => {
-      console.error(e);
-    });
-    socket.addEventListener('close', () => {
-      console.log('Socket connection closed');
-    });
-    socket.addEventListener('message', (e) => {
-      setLatency(JSON.parse(e.data).reqTime);
-    });
+    new WebsocketInstance(setLatency);
 
     void fetchServices({
       setServices: setServices,
@@ -43,41 +77,6 @@ export default function MonitoringApplication() {
     });
   }, []);
 
-  const handleCardClick = (serviceId: string) => {
-    setSelectedService(
-      services.find((service) => {
-        return serviceId === service.id;
-      })
-    );
-  };
-
-  const handleCreate = (service: Service) => {
-    void createService({
-      serviceToCreate: service,
-      setServices: setServices,
-      setLoading: setLoading
-    });
-  };
-
-  const handleUpdateClick = (
-    service: Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>
-  ) => {
-    void updateService({
-      service: service,
-      setServices: setServices,
-      setSelectedService: setSelectedService,
-      setLoading: setLoading
-    });
-  };
-
-  const handleDeleteClick = (serviceId: string) => {
-    void deleteService({
-      serviceId: serviceId,
-      setServices: setServices,
-      setLoading: setLoading
-    });
-  };
-
   const bodyCards = services.map((service, index) => {
     return (
       <Card
@@ -85,23 +84,34 @@ export default function MonitoringApplication() {
         service={service}
         latency={latency}
         onCardClick={handleCardClick}
-        submitForm={handleUpdateClick}
-        onDeleteClick={handleDeleteClick}
+        // TODO Resolve this
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        onSubmitForm={handleUpdate}
+        onDeleteClick={handleDelete}
       />
     );
   });
   bodyCards.push(
-    <AddCard key={bodyCards.length + 1} submitForm={handleCreate} />
+    // TODO Resolve this
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-expect-error
+    <AddCard key={bodyCards.length + 1} onSubmitForm={handleCreate} />
   );
   const headerData = {
     headerInformation: (
       <HeaderInformation
         name={selectedService?.name ?? ''}
         uri={selectedService?.uri ?? ''}
-        interval={selectedService?.monitorInterval.toString() ?? '0'}
+        interval={selectedService?.monitorInterval.toString() ?? ''}
       />
     ),
-    headerThresholds: <HeaderThreshold items={selectedService?.thresholds} />,
+    headerThresholds: (
+      // TODO Resolve this
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      <HeaderThreshold thresholds={selectedService?.thresholds} />
+    ),
     bodyCards: bodyCards
   };
 

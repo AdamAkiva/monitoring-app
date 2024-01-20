@@ -1,5 +1,6 @@
 import {
   HttpInstance,
+  WebsocketInstance,
   createService,
   deleteService,
   fetchServices,
@@ -13,6 +14,7 @@ import { uppercaseFirstLetter } from './functions.ts';
 
 export {
   HttpInstance,
+  WebsocketInstance,
   createService,
   deleteService,
   fetchServices,

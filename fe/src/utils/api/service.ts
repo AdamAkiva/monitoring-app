@@ -1,4 +1,9 @@
-import type { Dispatch, Service, SetStateAction } from '@/types';
+import type {
+  Dispatch,
+  Service,
+  ServiceCreation,
+  SetStateAction
+} from '@/types';
 import { httpInstance } from '@/utils';
 
 /**********************************************************************************/
@@ -36,7 +41,7 @@ export const fetchServices = async (params: {
 };
 
 export const createService = async (params: {
-  serviceToCreate: Service;
+  serviceToCreate: ServiceCreation;
   setServices: Dispatch<SetStateAction<Service[]>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
@@ -62,13 +67,14 @@ export const createService = async (params: {
 };
 
 export const updateService = async (params: {
-  service: Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>;
+  serviceUpdates: Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>;
   setServices: Dispatch<SetStateAction<Service[]>>;
   setSelectedService: Dispatch<SetStateAction<Service | undefined>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const { service, setServices, setSelectedService, setLoading } = params;
-  const { id: serviceId, ...updates } = service;
+  const { serviceUpdates, setServices, setSelectedService, setLoading } =
+    params;
+  const { id: serviceId, ...updates } = serviceUpdates;
 
   setLoading(true);
   try {
@@ -106,9 +112,10 @@ export const updateService = async (params: {
 export const deleteService = async (params: {
   serviceId: string;
   setServices: Dispatch<SetStateAction<Service[]>>;
+  setSelectedService: Dispatch<SetStateAction<Service | undefined>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const { serviceId, setServices, setLoading } = params;
+  const { serviceId, setServices, setSelectedService, setLoading } = params;
 
   setLoading(true);
   try {
@@ -131,6 +138,13 @@ export const deleteService = async (params: {
       }
 
       return services;
+    });
+    setSelectedService((service) => {
+      if (service && service.id === serviceId) {
+        return undefined;
+      }
+
+      return service;
     });
   } catch (err) {
     console.error(err);

@@ -1,20 +1,31 @@
-import { AiOutlinePlus, useState } from '@/types';
+import {
+  AiOutlinePlus,
+  useCallback,
+  useState,
+  type ServiceCreation,
+  type ServiceUpdates
+} from '@/types';
 import SubmitForm from './SubmitForm.tsx';
 
 import './AddCard.css';
 
 /**********************************************************************************/
 
-export default function AddCard({ submitForm }) {
+type AddCardProps = {
+  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+};
+
+/**********************************************************************************/
+
+export default function AddCard({ onSubmitForm }: AddCardProps) {
   const [showForm, setShowForm] = useState(false);
 
-  const openForm = () => {
+  const openForm = useCallback(() => {
     setShowForm(true);
-  };
-
-  const closeForm = () => {
+  }, []);
+  const closeForm = useCallback(() => {
     setShowForm(false);
-  };
+  }, []);
 
   return (
     <div className="add-card">
@@ -23,7 +34,7 @@ export default function AddCard({ submitForm }) {
       </button>
       {showForm && (
         <SubmitForm
-          submitForm={submitForm}
+          onSubmitForm={onSubmitForm}
           closeForm={closeForm}
           state={undefined}
         />

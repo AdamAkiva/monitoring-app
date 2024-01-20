@@ -2,15 +2,23 @@ import './HeaderThreshold.css';
 
 /**********************************************************************************/
 
-export default function HeaderThreshold({ items }) {
-  const thresholds = items?.map(({ lowerLimit, upperLimit }, index) => {
-    return (
-      <div key={index} className="header-thresholds-section">
-        <b>Lower threshold:</b> {lowerLimit !== '' ? `${lowerLimit}ms` : null}
-        <b>Upper threshold:</b> {upperLimit !== '' ? `${upperLimit}ms` : null}
-      </div>
-    );
-  });
+type HeaderThresholdProps = {
+  thresholds: { lowerLimit: string; upperLimit: string }[] | undefined;
+};
 
-  return <div className="header-thresholds">{thresholds}</div>;
+/**********************************************************************************/
+
+export default function HeaderThreshold({ thresholds }: HeaderThresholdProps) {
+  const thresholdElements = thresholds?.map(
+    ({ lowerLimit, upperLimit }, index) => {
+      return (
+        <div key={index} className="header-thresholds-section">
+          <b>Lower threshold:</b> {lowerLimit !== '' ? `${lowerLimit}ms` : null}
+          <b>Upper threshold:</b> {upperLimit !== '' ? `${upperLimit}ms` : null}
+        </div>
+      );
+    }
+  );
+
+  return <div className="header-thresholds">{thresholdElements}</div>;
 }

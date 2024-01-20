@@ -2,7 +2,19 @@ import './HeaderInformation.css';
 
 /**********************************************************************************/
 
-export default function HeaderInformation({ name, uri, interval }) {
+type HeaderInformationProps = {
+  name: string;
+  uri: string;
+  interval: string;
+};
+
+/**********************************************************************************/
+
+export default function HeaderInformation({
+  name,
+  uri,
+  interval
+}: HeaderInformationProps) {
   return (
     <div className="header-information">
       <div className="header-information-row">

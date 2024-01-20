@@ -1,8 +1,20 @@
-import { AiOutlinePlus, useState } from '@/types';
+import {
+  AiOutlinePlus,
+  useState,
+  type Service,
+  type ServiceCreation,
+  type ServiceUpdates
+} from '@/types';
 
 import './SubmitForm.css';
 
 /**********************************************************************************/
+
+type SubmitFormProps = {
+  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+  closeForm: () => void;
+  state: Service | undefined;
+};
 
 const baseState = {
   name: '',
@@ -19,7 +31,11 @@ const baseState = {
 
 /**********************************************************************************/
 
-export default function SubmitForm({ submitForm, closeForm, state }) {
+export default function SubmitForm({
+  onSubmitForm,
+  closeForm,
+  state
+}: SubmitFormProps) {
   const [formData, setFormData] = useState(
     (state as typeof baseState | undefined) ?? baseState
   );
@@ -78,7 +94,7 @@ export default function SubmitForm({ submitForm, closeForm, state }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const service = {
@@ -91,7 +107,7 @@ export default function SubmitForm({ submitForm, closeForm, state }) {
         };
       })
     };
-    submitForm(service);
+    onSubmitForm(service);
   };
 
   const rows = formData.thresholds.map((thresholds, index) => {

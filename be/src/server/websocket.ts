@@ -53,7 +53,6 @@ export default class {
   };
 
   private readonly _scheduleMonitor = async (serviceId: string) => {
-    console.log(this._monitorMap);
     const service = this._monitorMap.get(serviceId);
     if (!service) {
       return await Promise.resolve();

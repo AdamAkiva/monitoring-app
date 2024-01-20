@@ -49,4 +49,4 @@ export default class HttpInstance {
   };
 }
 
-export const httpInstance = new HttpInstance(getEnvValue('SERVER_URL'));
+export const httpInstance = new HttpInstance(getEnvValue('HTTP_SERVER_URL'));
