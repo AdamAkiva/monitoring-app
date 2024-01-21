@@ -28,7 +28,7 @@ chmod +x ./scripts/start.sh ./scripts/remove.sh
 
 ### TL:DR
 
-I wish I had more time pretty much, there so much left to do.  
+I wish I had more time, there so much left to do.  
 The basic functionality works, but the UX is problematic, the UI is abysmal
 and there's not enough error handling.
 
