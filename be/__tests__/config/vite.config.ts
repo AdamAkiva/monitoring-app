@@ -9,9 +9,10 @@ export default defineConfig({
     teardownTimeout: 4_000,
     globalSetup: './__tests__/config/setup.ts',
     logHeapUsage: true,
+    slowTestThreshold: 400,
     server: {
       sourcemap: 'inline'
     },
-    reporters: 'default'
+    reporters: ['default']
   }
 });

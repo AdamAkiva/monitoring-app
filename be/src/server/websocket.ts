@@ -2,10 +2,11 @@ import {
   WebSocket,
   WebSocketServer,
   ky,
+  setTimeout,
   type Server,
   type ServiceData
 } from '../types/index.js';
-import { logger } from '../utils/index.js';
+import { STATUS, logger } from '../utils/index.js';
 
 /**********************************************************************************/
 
@@ -19,7 +20,7 @@ export default class {
       server: server,
       backlog: 512,
       maxPayload: 65_536,
-      clientTracking: true
+      clientTracking: false
     });
     this._monitorMap = monitorMap;
 
@@ -34,55 +35,34 @@ export default class {
     this._scheduleMonitors();
   }
 
-  private readonly _attachEventHandlers = () => {
-    this._wss.on('error', (err) => {
-      logger.error(err, 'Socket Server error');
-    });
-
-    this._wss.on('connection', (socket) => {
-      socket.on('error', (err) => {
-        logger.error(err, 'Socket client error');
-      });
-    });
-  };
-
   private readonly _scheduleMonitors = () => {
-    for (const [key] of this._monitorMap) {
-      void this._scheduleMonitor(key);
+    for (const [serviceId, service] of this._monitorMap) {
+      void this._monitorCheck(serviceId, service.uri);
     }
   };
 
-  private readonly _scheduleMonitor = async (serviceId: string) => {
-    const service = this._monitorMap.get(serviceId);
-    if (!service) {
-      return await Promise.resolve();
-    }
-
-    await this._monitorCheck(service.uri);
-    setTimeout(this._scheduleMonitor, service.interval, serviceId);
+  private readonly _monitorCheck = async (
+    serviceId: string,
+    serviceUri: string
+  ) => {
+    const broadcastMsg = await this._sendPingRequest(serviceUri);
+    this._sendBroadcastMessage(broadcastMsg);
+    await this._rescheduleCheck(serviceId);
   };
 
-  private readonly _monitorCheck = async (serviceUri: string) => {
-    let msg: { serviceUri: string; reqTime: number } = {
-      serviceUri: '',
-      reqTime: 0
-    };
-    try {
-      const startTime = performance.now();
-      const { status } = await this._sendHttpRequest.head(serviceUri);
-      const reqTime = performance.now() - startTime;
+  private readonly _sendPingRequest = async (serviceUri: string) => {
+    let startTime = performance.now();
+    let status = (await this._sendHttpRequest.head(serviceUri)).status;
+    if (status === STATUS.NOT_ALLOWED.CODE) {
+      startTime = performance.now();
+      status = (await this._sendHttpRequest.get(serviceUri)).status;
+    }
+    const reqTime = performance.now() - startTime;
 
-      if (status >= 200 && status < 300) {
-        msg = { serviceUri: serviceUri, reqTime: Number(reqTime.toFixed(2)) };
-      } else {
-        msg = { serviceUri: serviceUri, reqTime: -1 };
-      }
-    } catch (err) {
-      logger.error(err, 'Error during monitor check: ');
-
-      msg = { serviceUri: serviceUri, reqTime: -1 };
-    } finally {
-      this._sendBroadcastMessage(msg);
+    if (status >= 200 && status < 300) {
+      return { serviceUri: serviceUri, reqTime: Number(reqTime.toFixed(2)) };
+    } else {
+      return { serviceUri: serviceUri, reqTime: -1 };
     }
   };
 
@@ -94,6 +74,28 @@ export default class {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(msg));
       }
+    });
+  };
+
+  private readonly _rescheduleCheck = async (serviceId: string) => {
+    const service = this._monitorMap.get(serviceId);
+    if (!service) {
+      return await Promise.resolve();
+    }
+    await setTimeout(service.interval);
+    await this._monitorCheck(serviceId, service.uri);
+  };
+
+  private readonly _attachEventHandlers = () => {
+    this._wss.on('error', (err) => {
+      logger.error(err, 'Socket Server error');
+    });
+
+    this._wss.on('connection', (socket) => {
+      console.log(socket);
+      socket.on('error', (err) => {
+        logger.error(err, 'Socket client error');
+      });
     });
   };
 
@@ -109,7 +111,7 @@ export default class {
       interval: service.interval
     });
 
-    void this._scheduleMonitor(serviceId);
+    void this._monitorCheck(serviceId, service.uri);
   };
 
   public readonly deleteMonitoredService = (serviceId: string) => {
@@ -117,6 +119,8 @@ export default class {
   };
 
   public readonly close = () => {
-    this._wss.close();
+    this._wss.close((e) => {
+      logger.error(e);
+    });
   };
 }

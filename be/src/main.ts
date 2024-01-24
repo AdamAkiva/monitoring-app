@@ -1,9 +1,12 @@
 import { HttpServer } from './server/index.js';
+import { EventEmitter } from './types/index.js';
 import { getEnv, logger } from './utils/index.js';
 
 /**********************************************************************************/
 
 const startServer = async () => {
+  EventEmitter.captureRejections = true;
+
   const { mode, server: serverEnv, db: dbUri } = getEnv();
 
   const server = await HttpServer.create({

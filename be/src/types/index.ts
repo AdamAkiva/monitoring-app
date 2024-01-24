@@ -1,6 +1,8 @@
+import { EventEmitter } from 'node:events';
 import { createServer, type Server } from 'node:http';
 import { hostname, machine, platform, release } from 'node:os';
 import { pid, version } from 'node:process';
+import { setTimeout } from 'node:timers/promises';
 import { URL } from 'node:url';
 
 import compress from 'compression';
@@ -95,6 +97,7 @@ export {
   desc,
   drizzle,
   eq,
+  EventEmitter,
   express,
   hostname,
   inArray,
@@ -111,6 +114,7 @@ export {
   platform,
   release,
   Router,
+  setTimeout,
   SQL,
   sql,
   URL,

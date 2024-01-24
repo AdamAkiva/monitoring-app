@@ -48,8 +48,8 @@ export default class DatabaseHandler {
     });
 
     this._handler = drizzle(this._conn, {
-      schema: schema,
-      logger: !isProductionMode(mode)
+      schema: schema
+      // logger: !isProductionMode(mode)
     });
 
     this._models = {
@@ -73,6 +73,6 @@ export default class DatabaseHandler {
   };
 
   public readonly close = async () => {
-    return await this._conn.end();
+    return await this._conn.end({ timeout: 4000 });
   };
 }

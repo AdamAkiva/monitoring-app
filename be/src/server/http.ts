@@ -257,7 +257,8 @@ export default class HttpServer {
     });
     server.once('close', async () => {
       wss.close();
-      await Promise.all([db.close()]);
+      await db.close();
+
       // Graceful shutdown
       process.exitCode = 0;
     });
