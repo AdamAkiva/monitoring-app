@@ -12,7 +12,7 @@ import {
   type Server,
   type ServiceData
 } from '../types/index.js';
-import { getEnv, logger } from '../utils/index.js';
+import { getEnv, isProductionMode, logger } from '../utils/index.js';
 import WebSocketServer from './websocket.js';
 
 import type {} from 'swagger-ui-express';
@@ -58,7 +58,7 @@ export default class HttpServer {
         'DELETE',
         'OPTIONS'
       ]);
-      if (mode === 'production') {
+      if (isProductionMode(mode)) {
         // Make sure the reverse-proxy sets the correct settings for the logs to be
         // accurate. See: http://expressjs.com/en/guide/behind-proxies.html
         app.set('trust proxy', true);
@@ -188,7 +188,7 @@ export default class HttpServer {
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
-    if (mode !== 'production') {
+    if (!isProductionMode(mode)) {
       await HttpServer._attachSwaggerDocs(app, apiRoute);
     }
 
@@ -236,7 +236,7 @@ export default class HttpServer {
       readFileSync(
         resolve(
           new URL('', import.meta.url).pathname,
-          `../../api-docs/openapi.yaml`
+          `../../api-docs/openapi.yml`
         ),
         'utf-8'
       )

@@ -27,10 +27,11 @@ import express, {
   type NextFunction,
   type Response
 } from 'express';
-import type { ParamsDictionary } from 'express-serve-static-core';
+import type core from 'express-serve-static-core';
 import ky, { type Options as KyOptions } from 'ky';
 import { pinoHttp, type HttpLogger } from 'pino-http';
-import postgres from 'postgres';
+import pg from 'postgres';
+import type qs from 'qs';
 import type { JsonObject } from 'swagger-ui-express';
 import { WebSocket, WebSocketServer } from 'ws';
 import { z as Zod } from 'zod';
@@ -38,7 +39,7 @@ import { z as Zod } from 'zod';
 /**********************************************************************************/
 
 export type Request = ExpressRequest<
-  ParamsDictionary,
+  core.ParamsDictionary,
   UnknownObject,
   UnknownObject,
   qs.ParsedQs,
@@ -104,10 +105,10 @@ export {
   machine,
   ne,
   notInArray,
+  pg,
   pid,
   pinoHttp,
   platform,
-  postgres,
   release,
   Router,
   SQL,

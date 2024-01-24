@@ -74,7 +74,7 @@ services:
       - TEST_DB_URI=postgres://admin:admin@monitoring-app-pg-test:5432/monitoring-app-test
       - NODE_ENV=development
     volumes:
-      - ../be:/home/node:rw
+      - ../be:/home/node/monitoring-app:rw
     logging:
       driver: "json-file"
       options:
@@ -117,7 +117,7 @@ services:
       - MONITORING_APP_WS_SERVER_URL=ws://localhost:4500
       - NODE_ENV=development
     volumes:
-      - ../fe:/home/node:rw
+      - ../fe:/home/node/monitoring-app:rw
     logging:
       driver: "json-file"
       options:

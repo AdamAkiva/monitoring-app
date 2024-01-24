@@ -1,5 +1,5 @@
 import { ERR_CODES } from '../db/handler.js';
-import { postgres as pg, type Request } from '../types/index.js';
+import { pg, type Request } from '../types/index.js';
 import { STATUS } from './constants.js';
 import MonitoringAppError from './error.js';
 
@@ -28,6 +28,10 @@ export const filterNullAndUndefined = <T>(
   return value != null;
 };
 
+export const isProductionMode = (env?: string) => {
+  return env === 'production';
+};
+
 export const sanitizeError = (
   err: unknown,
   entity?: { type: 'Service'; name: string }
@@ -35,10 +39,14 @@ export const sanitizeError = (
   if (err instanceof pg.PostgresError) {
     switch (err.code) {
       case ERR_CODES.UNIQUE_VIOLATION:
-        return new MonitoringAppError(
-          `${entity?.type ?? 'Unknown'} '${entity?.name ?? 'unknown'}' already exists'`,
-          STATUS.CONFLICT.CODE
-        );
+        if (entity) {
+          return new MonitoringAppError(
+            `${entity.type} '${entity.name}' already exists'`,
+            STATUS.CONFLICT.CODE
+          );
+        }
+
+        return new MonitoringAppError(err.message, STATUS.SERVER_ERROR.CODE);
       default:
         return new MonitoringAppError(err.message, STATUS.GATEWAY_TIMEOUT.CODE);
     }

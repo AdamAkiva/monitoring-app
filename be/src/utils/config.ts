@@ -1,4 +1,5 @@
 import type { EnvironmentVariables, Mode } from '../types/index.js';
+import { isProductionMode } from './functions.js';
 import { logger } from './logger.js';
 
 /**********************************************************************************/
@@ -22,7 +23,8 @@ export const getEnv = () => {
       apiRoute: process.env.API_ROUTE!,
       healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!,
       allowedOrigins:
-        typeof process.env.ALLOWED_ORIGINS === 'string' && mode !== 'production'
+        typeof process.env.ALLOWED_ORIGINS === 'string' &&
+        !isProductionMode(mode)
           ? process.env.ALLOWED_ORIGINS
           : process.env.ALLOWED_ORIGINS!.split(',')
     },

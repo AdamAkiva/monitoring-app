@@ -8,11 +8,12 @@ import {
   version
 } from '../types/index.js';
 import { STATUS } from './constants.js';
+import { isProductionMode } from './functions.js';
 
 /**********************************************************************************/
 
 export const logMiddleware = pinoHttp({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'trace',
+  level: isProductionMode(process.env.NODE_ENV) ? 'info' : 'trace',
   depthLimit: 5,
   edgeLimit: 100,
   messageKey: 'msg',

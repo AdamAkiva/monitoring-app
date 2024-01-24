@@ -11,13 +11,10 @@ import {
   it
 } from 'vitest';
 
-import * as controllers from '../../src/controllers/index.js';
 import type {
   CreateThreshold,
   CreateService as DCreateService
 } from '../../src/db/index.js';
-import * as Middlewares from '../../src/server/middleware.js';
-import * as services from '../../src/services/index.js';
 import {
   ky,
   type KyOptions,
@@ -123,14 +120,14 @@ export const createServices = async (servicesData: CreateService[]) => {
   // client requested
   const services: Service[] = [];
   for (const serviceData of servicesData) {
+    // On purpose to keep the creation order consistent
+    // eslint-disable-next-line no-await-in-loop
     const { data, statusCode } = await sendHttpRequest<Service>(
       serviceRouteURL,
-      {
-        method: 'post',
-        json: serviceData
-      }
+      { method: 'post', json: serviceData }
     );
     expect(statusCode).toBe(STATUS.CREATED.CODE);
+    checkMatchIgnoringOrder([serviceData], [data]);
 
     services.push(data);
   }
@@ -141,19 +138,16 @@ export const createServices = async (servicesData: CreateService[]) => {
 /**********************************************************************************/
 
 export {
-  Middlewares,
   STATUS,
   VALIDATION,
   afterAll,
   afterEach,
   beforeAll,
   beforeEach,
-  controllers,
   describe,
   expect,
   inject,
   it,
   randomUUID,
-  services,
   type Service
 };

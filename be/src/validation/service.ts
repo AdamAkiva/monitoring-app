@@ -34,12 +34,12 @@ export const readMany = (req: Request) => {
   const { body, params, query } = req;
 
   validateEmptyObject('service', { ...body, ...params, ...query });
-
-  return undefined;
 };
 
 export const createOne = (req: Request) => {
   const { body, params, query } = req;
+
+  validateEmptyObject('service', { ...params, ...query });
 
   const res = Zod.object(
     {
@@ -136,15 +136,15 @@ export const createOne = (req: Request) => {
     throw parseErrors(res.error);
   }
 
-  validateEmptyObject('service', { ...params, ...query });
-
   return res.data;
 };
 
 export const updateOne = (req: Request) => {
   const { body, params, query } = req;
 
-  const paramsRes = Zod.object(
+  validateEmptyObject('service', query);
+
+  const paramsSchema = Zod.object(
     {
       serviceId: Zod.string({
         invalid_type_error: invalidStringErr(' service id'),
@@ -159,9 +159,8 @@ export const updateOne = (req: Request) => {
     .strict(invalidStructure(' service'))
     .transform(({ serviceId }) => {
       return { id: serviceId };
-    })
-    .safeParse(params);
-  const bodyRes = Zod.object(
+    });
+  const bodySchema = Zod.object(
     {
       name: Zod.string({
         invalid_type_error: invalidStringErr('uri'),
@@ -259,25 +258,32 @@ export const updateOne = (req: Request) => {
       }
 
       return val;
-    })
-    .safeParse(body);
+    });
 
+  const paramsRes = paramsSchema.safeParse(params);
+  const bodyRes = bodySchema.safeParse(body);
+
+  const errs: Zod.ZodError[] = [];
   if (!paramsRes.success) {
-    throw parseErrors(paramsRes.error);
+    errs.push(paramsRes.error);
   }
   if (!bodyRes.success) {
-    throw parseErrors(bodyRes.error);
+    errs.push(bodyRes.error);
   }
-  validateEmptyObject('service', query);
+  if (errs.length) {
+    throw parseErrors(...errs);
+  }
 
   return {
-    ...paramsRes.data,
-    ...bodyRes.data
+    ...(paramsRes as Zod.SafeParseSuccess<Zod.infer<typeof paramsSchema>>).data,
+    ...(bodyRes as Zod.SafeParseSuccess<Zod.infer<typeof bodySchema>>).data
   };
 };
 
 export const deleteOne = (req: Request) => {
   const { body, params, query } = req;
+
+  validateEmptyObject('service', { ...body, ...query });
 
   const res = Zod.object(
     {
@@ -297,8 +303,6 @@ export const deleteOne = (req: Request) => {
   if (!res.success) {
     throw parseErrors(res.error);
   }
-
-  validateEmptyObject('service', { ...body, ...query });
 
   return res.data.serviceId;
 };

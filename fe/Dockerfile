@@ -8,4 +8,4 @@ RUN apk update && apk add curl
 FROM fe-base as fe-dev
 
 # Set the workdir
-WORKDIR /home/node
+WORKDIR /home/node/monitoring-app

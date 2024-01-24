@@ -1,38 +1,117 @@
+/* eslint-disable no-undef */
+
+/*
+  These rules should **not** conflict with prettier, such as spaces and new lines
+  rules. Please refrain from doing rules for it, or you will encounter issues.
+  (Unless you sure about what you're doing)
+*/
+
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh'],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'react-refresh'],
+  extends: ['plugin:security/recommended-legacy', 'prettier'],
   settings: {
     react: { version: 'detect' }
   },
   overrides: [
     {
       files: ['./src/**/*.ts', './src/**/*.tsx'],
-      extends: [
-        'eslint:recommended',
-        'plugin:security/recommended-legacy',
-        'plugin:react/recommended',
-        'plugin:react/jsx-runtime',
-        'plugin:react-hooks/recommended',
-        'plugin:@typescript-eslint/strict-type-checked',
-        'plugin:@typescript-eslint/stylistic-type-checked',
-        'prettier'
-      ],
       parserOptions: {
-        ecmaVersion: 'latest',
+        ecmaVersion: '2020',
         tsconfigRootDir: __dirname,
         sourceType: 'module',
-        project: './tsconfig.json'
+        project: './tsconfig.json',
+        ecmaFeature: { jsx: true }
       },
       rules: {
-        // React related
-        'react-refresh/only-export-components': [
-          'warn',
-          { allowConstantExport: true }
-        ],
+        // Javascript
+        'array-callback-return': [2, { checkForEach: false, allowVoid: true }],
+        'constructor-super': 2,
+        'for-direction': 2,
+        'getter-return': 2,
+        'no-async-promise-executor': 2,
+        'no-await-in-loop': 2,
+        'no-class-assign': 2,
+        'no-compare-neg-zero': 2,
+        'no-cond-assign': [2, 'always'],
+        'no-const-assign': 2,
+        'no-constant-binary-expression': 2,
+        'no-constant-condition': 2,
+        'no-constructor-return': 2,
+        'no-control-regex': 2,
+        'no-debugger': 2,
+        'no-dupe-args': 2,
+        'no-dupe-class-members': 2,
+        'no-dupe-else-if': 2,
+        'no-dupe-keys': 2,
+        'no-duplicate-case': 2,
+        'no-duplicate-imports': [2, { includeExports: true }],
+        'no-empty-character-class': 2,
+        'no-empty-pattern': 2,
+        'no-ex-assign': 2,
+        'no-fallthrough': 2,
+        'no-inner-declarations': 2,
+        'no-invalid-regexp': 2,
+        'no-irregular-whitespace': 2,
+        'no-misleading-character-class': 2,
+        'no-new-native-nonconstructor': 2,
+        'no-promise-executor-return': [2, { allowVoid: true }],
+        'no-prototype-builtins': 2,
+        'no-self-assign': 2,
+        'no-self-compare': 2,
+        'no-setter-return': 2,
+        'no-sparse-arrays': 2,
+        'no-template-curly-in-string': 2,
+        'no-undef': 2,
+        'no-unexpected-multiline': 2,
+        'no-unmodified-loop-condition': 2,
+        'no-unreachable-loop': 2,
+        'no-unsafe-finally': 2,
+        'no-unsafe-optional-chaining': 2,
+        'no-unused-private-class-members': 2,
+        'no-useless-backreference': 2,
+        'require-atomic-updates': 2,
+        'use-isnan': 2,
+        'valid-typeof': 2,
+        'accessor-pairs': 2,
+        // Stylistic choice, I highly recommend it, but feel free to change it
+        'arrow-body-style': [2, 'always'],
+        // If you use var, use it right, with let and const this rule is redundant
+        'block-scoped-var': 2,
+        'default-case-last': 2,
+        eqeqeq: [2, 'smart'],
+        'max-classes-per-file': [2, 1],
+        // I present it only as a warning and not an error since sometimes (very
+        //rarely it can't be avoided)
+        'max-depth': [1, 4],
+        'no-delete-var': 2,
+        'no-empty': 2,
+        'no-empty-static-block': 2,
+        'no-eval': 2,
+        'no-extra-boolean-cast': 2,
+        'no-invalid-this': 2,
+        'no-iterator': 2,
+        'no-labels': 2,
+        'no-nonoctal-decimal-escape': 2,
+        'no-octal': 2,
+        'no-proto': 2,
+        'no-regex-spaces': 2,
+        'no-return-assign': [2, 'always'],
+        'no-script-url': 2,
+        'no-shadow-restricted-names': 2,
+        'no-unneeded-ternary': 2,
+        'no-unused-labels': 2,
+        'no-useless-catch': 2,
+        'no-useless-escape': 2,
+        'no-var': 2,
+        'no-with': 2,
+        'prefer-const': 2,
+        'prefer-promise-reject-errors': 2,
+        'require-yield': 2,
 
-        // Typescript & Security related
+        // Typescript related
         '@typescript-eslint/adjacent-overload-signatures': 2,
         '@typescript-eslint/array-type': [2, { default: 'array' }],
         '@typescript-eslint/await-thenable': 2,
@@ -117,11 +196,9 @@ module.exports = {
         '@typescript-eslint/sort-type-constituents': 2,
         '@typescript-eslint/switch-exhaustiveness-check': 2,
 
+        // Typescript overrides
         'default-param-last': 'off',
         '@typescript-eslint/default-param-last': 2,
-
-        'init-declarations': 'off',
-        '@typescript-eslint/init-declarations': 2,
 
         'max-params': 'off',
         '@typescript-eslint/max-params': [2, { max: 3 }],
@@ -156,6 +233,12 @@ module.exports = {
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': [2, { ignoreRestSiblings: true }],
 
+        'no-use-before-define': 'off',
+        '@typescript-eslint/no-use-before-define': [
+          2,
+          { functions: false, variables: false }
+        ],
+
         'no-useless-constructor': 'off',
         '@typescript-eslint/no-useless-constructor': 2,
 
@@ -165,6 +248,98 @@ module.exports = {
         'no-return-await': 'off',
         '@typescript-eslint/return-await': [2, 'always'],
 
+        // React related
+        'react/boolean-prop-naming': [2, { validateNested: true }],
+        'react/button-has-type': 2,
+        'react/default-props-match-prop-types': 2,
+        'react/destructuring-assignment': [2, 'always'],
+        'react/display-name': 2,
+        'react/forbid-prop-types': 2,
+        // Stylistic choice, feel free to change it to whatever
+        'react/function-component-definition': [
+          2,
+          { namedComponents: 'arrow-function' }
+        ],
+        'react/hook-use-state': 2,
+        'react/iframe-missing-sandbox': 2,
+        'react/no-access-state-in-setstate': 2,
+        'react/no-adjacent-inline-elements': 2,
+        'react/no-array-index-key': 2,
+        'react/no-children-prop': 2,
+        'react/no-danger-with-children': 2,
+        'react/no-danger': 2,
+        'react/no-deprecated': 2,
+        'react/no-did-mount-set-state': [2, 'disallow-in-func'],
+        'react/no-did-update-set-state': [2, 'disallow-in-func'],
+        'react/no-direct-mutation-state': 2,
+        'react/no-find-dom-node': 2,
+        'react/no-invalid-html-attribute': 2,
+        'react/no-is-mounted': 2,
+        'react/no-multi-comp': [2, { ignoreStateless: true }],
+        'react/no-namespace': 2,
+        'react/no-object-type-as-default-prop': 2,
+        'react/no-redundant-should-component-update': 2,
+        'react/no-render-return-value': 2,
+        'react/no-string-refs': 2,
+        'react/no-this-in-sfc': 2,
+        'react/no-unescaped-entities': 2,
+        'react/no-unknown-property': 2,
+        'react/no-unsafe': [2, { checkAliases: true }],
+        'react/no-unstable-nested-components': 2,
+        'react/no-unused-class-component-methods': 2,
+        'react/no-unused-prop-types': 2,
+        'react/no-unused-state': 2,
+        'react/no-will-update-set-state': [2, 'disallow-in-func'],
+        'react/prefer-es6-class': [2, 'always'],
+        'react/prefer-stateless-function': 2,
+        'react/prop-types': 2,
+        'react/require-render-return': 2,
+        'react/self-closing-comp': 2,
+        'react/sort-comp': 2,
+        'react/state-in-constructor': 2,
+        'react/style-prop-object': 2,
+        'react/void-dom-elements-no-children': 2,
+
+        // React hooks
+        'react-hooks/rules-of-hooks': 'error',
+        'react-hooks/exhaustive-deps': 'warn',
+
+        // Reach fash refresh
+        'react-refresh/only-export-components': [
+          2,
+          { allowConstantExport: true }
+        ],
+
+        // React-JSX related
+        'react/jsx-boolean-value': [2, 'always'],
+        'react/jsx-filename-extension': [
+          2,
+          { allow: 'as-needed', extensions: ['.jsx', '.tsx'] }
+        ],
+        'react/jsx-fragments': [2, 'syntax'],
+        'react/jsx-handler-names': 2,
+        'react/jsx-key': [
+          2,
+          {
+            checkFragmentShorthand: true,
+            checkKeyMustBeforeSpread: true,
+            warnOnDuplicates: true
+          }
+        ],
+        // Stylistic choice, feel free to change it to whatever
+        'react/jsx-max-depth': [2, { max: 10 }],
+        'react/jsx-no-comment-textnodes': 2,
+        'react/jsx-no-constructed-context-values': 2,
+        'react/jsx-no-duplicate-props': 2,
+        'react/jsx-no-leaked-render': 2,
+        'react/jsx-no-script-url': 2,
+        'react/jsx-no-target-blank': 2,
+        'react/jsx-no-undef': 2,
+        'react/jsx-no-useless-fragment': [2, { allowExpressions: true }],
+        'react/jsx-pascal-case': 2,
+        'react/jsx-uses-vars': 2,
+
+        // Security related
         'security/detect-bidi-characters': 2,
         'security/detect-buffer-noassert': 2,
         'security/detect-child-process': 2,

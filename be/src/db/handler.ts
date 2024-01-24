@@ -1,5 +1,6 @@
 // The default import is on purpose. See: https://orm.drizzle.team/docs/sql-schema-declaration
-import { drizzle, postgres, type Mode } from '../types/index.js';
+import { drizzle, pg, type Mode } from '../types/index.js';
+import { isProductionMode } from '../utils/functions.js';
 
 import * as schema from './schemas.js';
 
@@ -35,7 +36,7 @@ export default class DatabaseHandler {
   }) {
     const { mode, connName, connUri } = params;
 
-    this._conn = postgres(connUri, {
+    this._conn = pg(connUri, {
       connect_timeout: 30, // in secs
       idle_timeout: 180, // in secs
       max: 20,
@@ -43,10 +44,13 @@ export default class DatabaseHandler {
       connection: {
         application_name: connName
       },
-      debug: mode !== 'production'
+      debug: !isProductionMode(mode)
     });
 
-    this._handler = drizzle(this._conn, { schema: schema });
+    this._handler = drizzle(this._conn, {
+      schema: schema,
+      logger: !isProductionMode(mode)
+    });
 
     this._models = {
       serviceModel: schema.serviceModel,

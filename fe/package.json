@@ -5,7 +5,7 @@
   "main": "./src/main.tsx",
   "scripts": {
     "start:dev": "vite",
-    "test": "printf 'No tests exist' && exit 1",
+    "test": "printf 'No tests exist (yet)' && exit 1",
     "lint": "npx tsc --project ./tsconfig.json --noEmit && npx eslint \"src/**/*.{ts,tsx}\"",
     "build": "npx eslint './src/**/*.tsx' && vite build",
     "check-global-updates": "npx ncu -g",
