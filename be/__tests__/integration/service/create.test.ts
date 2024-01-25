@@ -23,7 +23,7 @@ describe('Create tests', () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_1',
         uri: 'https://SERVICE_CREATE_1.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -42,7 +42,7 @@ describe('Create tests', () => {
     it.concurrent('Without name', async () => {
       const serviceData: CreateService = {
         uri: 'https://SERVICE_CREATE_2.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -62,7 +62,7 @@ describe('Create tests', () => {
       const serviceData: CreateService = {
         name: '1בלה',
         uri: 'https://SERVICE_CREATE_3.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -82,7 +82,7 @@ describe('Create tests', () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_4',
         uri: 'https://SERVICE_CREATE_4.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -102,7 +102,7 @@ describe('Create tests', () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_5',
         uri: 'https://SERVICE_CREATE_5.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -131,7 +131,7 @@ describe('Create tests', () => {
     it.concurrent('Duplicate', async () => {
       const serviceData: CreateService = {
         uri: 'https://SERVICE_CREATE_6.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -157,7 +157,7 @@ describe('Create tests', () => {
     it.concurrent('With excess fields', async () => {
       const serviceData = {
         uri: 'https://SERVICE_CREATE_7.com',
-        monitorInterval: 30,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,
@@ -180,7 +180,7 @@ describe('Create tests', () => {
           json: {
             name: '',
             uri: 'https://SERVICE_CREATE_8.com',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -198,7 +198,7 @@ describe('Create tests', () => {
           json: {
             name: 'a'.repeat(VALIDATION.NAME_MAX_LEN + 1),
             uri: 'https://SERVICE_CREATE_9.com',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -218,7 +218,7 @@ describe('Create tests', () => {
           json: {
             name: 'SERVICE_CREATE_10',
             uri: '',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -236,7 +236,7 @@ describe('Create tests', () => {
           json: {
             name: 'SERVICE_CREATE_11',
             uri: 'a'.repeat(VALIDATION.URI_MAX_LEN + 1),
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -253,7 +253,7 @@ describe('Create tests', () => {
           method: 'POST',
           json: {
             name: 'SERVICE_CREATE_12',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -329,7 +329,7 @@ describe('Create tests', () => {
           json: {
             name: 'SERVICE_CREATE_16',
             uri: 'https://SERVICE_CREATE_16.com',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: true
           }
         });
@@ -343,7 +343,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_17',
               uri: 'https://SERVICE_CREATE_17.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: true,
@@ -361,7 +361,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_18',
               uri: 'https://SERVICE_CREATE_18.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: VALIDATION.THRESHOLD_MIN_VALUE - 1,
@@ -379,7 +379,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_19',
               uri: 'https://SERVICE_CREATE_19.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: VALIDATION.THRESHOLD_MAX_VAL + 1,
@@ -399,7 +399,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_20',
               uri: 'https://SERVICE_CREATE_20.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -417,7 +417,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_21',
               uri: 'https://SERVICE_CREATE_21.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: VALIDATION.THRESHOLD_MIN_VALUE - 1,
@@ -435,7 +435,7 @@ describe('Create tests', () => {
             json: {
               name: 'SERVICE_CREATE_22',
               uri: 'https://SERVICE_CREATE_22.com',
-              monitorInterval: 30,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -454,7 +454,7 @@ describe('Create tests', () => {
           json: {
             name: 'SERVICE_CREATE_23',
             uri: 'https://SERVICE_CREATE_23.com',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 30,
@@ -472,7 +472,7 @@ describe('Create tests', () => {
           json: {
             name: 'SERVICE_CREATE_24',
             uri: 'https://SERVICE_CREATE_24.com',
-            monitorInterval: 30,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 30,

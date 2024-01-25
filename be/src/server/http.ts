@@ -9,33 +9,30 @@ import {
   type Application,
   type JsonObject,
   type Mode,
-  type Server,
-  type ServiceData
+  type Server
 } from '../types/index.js';
-import { getEnv, isProductionMode, logger } from '../utils/index.js';
-import WebSocketServer from './websocket.js';
+import { isProductionMode, logger } from '../utils/index.js';
 
-import type {} from 'swagger-ui-express';
 import * as Middlewares from './middleware.js';
+import type MonitoredApps from './monitoredApps.js';
 
 /**********************************************************************************/
 
 export default class HttpServer {
   private readonly _server;
-  private readonly _wss;
   private readonly _db;
 
-  public static readonly create = async (params: {
+  public static async create(params: {
     mode: Mode;
+    monitoredApps: MonitoredApps;
     dbData: { name: string; uri: string };
     routes: { api: string; health: string };
     allowedOrigins: string[] | string;
-  }) => {
-    const { mode, dbData, routes, allowedOrigins } = params;
+  }) {
+    const { mode, monitoredApps, dbData, routes, allowedOrigins } = params;
 
     let db: DatabaseHandler | null = null;
     let server: Server | null = null;
-    let wss: WebSocketServer | null = null;
     try {
       db = new DatabaseHandler({
         mode: mode,
@@ -75,22 +72,20 @@ export default class HttpServer {
         });
       }
 
-      wss = new WebSocketServer(
-        server,
-        await HttpServer._setupMonitoringApplications(db)
-      );
       await HttpServer._attachRoutes({
         mode: mode,
         app: app,
         db: db,
-        routes: routes,
-        wss: wss
+        monitoredApps: monitoredApps,
+        routes: routes
       });
     } catch (err) {
       if (err instanceof Error) {
         logger.error(err, 'Error during server initialization');
       }
-      await Promise.all([db?.close(), wss?.close(), server?.close()]);
+      await Promise.all([db?.close()]);
+      server?.close();
+
       process.exitCode = 1;
 
       // Even though the global event handlers are not yet set-up the docs say:
@@ -100,14 +95,14 @@ export default class HttpServer {
       throw err;
     }
 
-    // After this point, there are handlers responsible for gracefully shutting
-    // down all of the resources used by the server
-    HttpServer._attachEventHandlers({ server: server, wss: wss, db: db });
+    // After this point, we can attach handlers which will be responsible for
+    // gracefully shutting down all of the resources used by the server
+    HttpServer._attachEventHandlers(server, db);
 
-    return new HttpServer({ server: server, wss: wss, db: db });
-  };
+    return new HttpServer(server, db);
+  }
 
-  private static readonly _attachConfigurations = (server: Server) => {
+  private static _attachConfigurations(server: Server) {
     server.maxHeadersCount = 256;
     server.headersTimeout = 8_000; // millis
     server.requestTimeout = 32_000; // millis
@@ -115,13 +110,13 @@ export default class HttpServer {
     // Limit sockets only by time, not amount of requests
     server.maxRequestsPerSocket = 0;
     server.keepAliveTimeout = 4_000; // millis
-  };
+  }
 
-  private static readonly _attachMiddlewareProd = async (params: {
+  private static async _attachMiddlewareProd(params: {
     app: Application;
     allowedMethods: Set<string>;
     allowedOrigins: string[] | string;
-  }) => {
+  }) {
     const { app, allowedMethods, allowedOrigins } = params;
 
     // This is the result of a bug with helmet typescript support, if helmet
@@ -154,13 +149,13 @@ export default class HttpServer {
       }),
       compress()
     );
-  };
+  }
 
-  private static readonly _attachMiddleware = (params: {
+  private static _attachMiddleware(params: {
     app: Application;
     allowedMethods: Set<string>;
     allowedOrigins: string[] | string;
-  }) => {
+  }) {
     const { app, allowedMethods, allowedOrigins } = params;
 
     app.use(
@@ -171,20 +166,20 @@ export default class HttpServer {
       Middlewares.checkMethod(allowedMethods),
       compress()
     );
-  };
+  }
 
-  private static readonly _attachRoutes = async (params: {
+  private static async _attachRoutes(params: {
     mode: Mode;
     app: Application;
     db: DatabaseHandler;
+    monitoredApps: MonitoredApps;
     routes: { api: string; health: string };
-    wss: WebSocketServer;
-  }) => {
+  }) {
     const {
       mode,
       app,
       db,
-      wss,
+      monitoredApps,
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
@@ -206,22 +201,24 @@ export default class HttpServer {
       })
     );
 
+    // Make sure the monitored apps are synced to the database. This should
+    // happen only once. After this point it is updated when upserting/deleting
+    // entries from the map
+    await monitoredApps.sync(db);
+
     // Defined after the health check route to prevent health check logs every
     // few seconds
     app.use(Middlewares.attachLogMiddleware(mode));
     app.use(
       apiRoute,
-      Middlewares.attachContext(db, wss),
+      Middlewares.attachContext(db, monitoredApps),
       serviceRouter,
       Middlewares.handleMissedRoutes,
       Middlewares.errorHandler
     );
-  };
+  }
 
-  private static readonly _attachSwaggerDocs = async (
-    app: Application,
-    apiRoute: string
-  ) => {
+  private static async _attachSwaggerDocs(app: Application, apiRoute: string) {
     // This should never be enabled in production build. The dynamic imports allows
     // for 'swagger-ui-express' & 'yaml' to be devDependencies
     const [{ serve, setup }, { parse }, { resolve }, { readFileSync }] =
@@ -243,21 +240,16 @@ export default class HttpServer {
     ) as JsonObject;
 
     app.use(`${apiRoute}/api-docs`, serve, setup(swaggerDoc));
-  };
+  }
 
-  private static readonly _attachEventHandlers = (params: {
-    server: Server;
-    db: DatabaseHandler;
-    wss: WebSocketServer;
-  }) => {
-    const { server, db, wss } = params;
-
+  private static _attachEventHandlers(server: Server, db: DatabaseHandler) {
     server.on('error', (err) => {
       logger.error(err, 'HTTP Server error');
     });
-    server.once('close', async () => {
-      wss.close();
-      await db.close();
+    server.once('close', () => {
+      db.close().catch((e) => {
+        logger.error(e, 'Error during database termination');
+      });
 
       // Graceful shutdown
       process.exitCode = 0;
@@ -269,74 +261,30 @@ export default class HttpServer {
     process.once('SIGTERM', () => {
       server.close();
     });
-  };
-
-  private static readonly _setupMonitoringApplications = async (
-    db: DatabaseHandler
-  ) => {
-    const handler = db.getHandler();
-    const { serviceModel } = db.getModels();
-
-    const services = await handler
-      .select({
-        id: serviceModel.id,
-        name: serviceModel.name,
-        uri: serviceModel.uri,
-        interval: serviceModel.monitorInterval
-      })
-      .from(serviceModel);
-
-    return new Map<string, ServiceData>(
-      services.map(({ id, name, uri, interval }) => {
-        return [id, { name: name, uri: uri, interval: interval }];
-      })
-    );
-  };
+  }
 
   /********************************************************************************/
 
-  private constructor(params: {
-    server: Server;
-    wss: WebSocketServer;
-    db: DatabaseHandler;
-  }) {
-    const { server, wss, db } = params;
-
-    // When we get to this stage of the server initialization, this class handles
-    // the cleanup on shutdown. Therefore remove the option to call close from
-    // the returned handlers
-    const { close: _, ...__wss } = wss;
-    const { close: __, ...__db } = db;
-
+  private constructor(server: Server, db: DatabaseHandler) {
     this._server = server;
-    this._wss = __wss;
-    this._db = __db;
+    this._db = db;
   }
 
-  public readonly listen = (port: number | string) => {
-    const { mode, server: serverEnv } = getEnv();
+  public listen(port: number | string, callback?: () => void) {
+    port = typeof port === 'string' ? Number(port) : port;
 
-    if (mode !== 'test') {
-      this._server.listen(port, () => {
-        logger.info(
-          `Server is running in '${mode}' mode on:` +
-            ` ${serverEnv.url}:${serverEnv.port}/${serverEnv.apiRoute}`
-        );
-      });
-    } else {
-      this._server.listen(port);
-    }
+    return this._server.listen(port, callback);
+  }
+
+  public getHandler = () => {
+    return this._server;
   };
 
-  public readonly getDatabase = () => {
+  public getDatabase() {
     return this._db;
-  };
+  }
 
-  public readonly getWebSocketServer = () => {
-    return this._wss;
-  };
-
-  public readonly close = () => {
+  public close() {
     this._server.close();
-  };
+  }
 }

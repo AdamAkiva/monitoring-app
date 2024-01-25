@@ -11,11 +11,11 @@ export default class MonitoringAppError extends Error {
     this._code = code;
   }
 
-  public readonly getMessage = () => {
+  public getMessage() {
     return this._msg;
-  };
+  }
 
-  public readonly getCode = () => {
+  public getCode() {
     return this._code;
-  };
+  }
 }

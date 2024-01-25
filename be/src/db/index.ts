@@ -1,5 +1,4 @@
 import DatabaseHandler, {
-  ERR_CODES,
   type DBHandler,
   type DBModels,
   type Transaction
@@ -15,7 +14,6 @@ import type {
 
 export {
   DatabaseHandler,
-  ERR_CODES,
   type CreateService,
   type CreateThreshold,
   type DBHandler,

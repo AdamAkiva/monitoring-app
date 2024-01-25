@@ -14,16 +14,6 @@ export type Transaction = Parameters<
 
 /**********************************************************************************/
 
-/**
- * See: https://www.postgresql.org/docs/current/errcodes-appendix.html
- */
-export const ERR_CODES = {
-  FOREIGN_KEY_VIOLATION: '23503',
-  UNIQUE_VIOLATION: '23505'
-};
-
-/**********************************************************************************/
-
 export default class DatabaseHandler {
   private readonly _conn;
   private readonly _handler;
@@ -60,19 +50,19 @@ export default class DatabaseHandler {
 
   /********************************************************************************/
 
-  public readonly getConnection = () => {
+  public getConnection() {
     return this._conn;
-  };
+  }
 
-  public readonly getHandler = () => {
+  public getHandler() {
     return this._handler;
-  };
+  }
 
-  public readonly getModels = () => {
+  public getModels() {
     return this._models;
-  };
+  }
 
-  public readonly close = async () => {
-    return await this._conn.end({ timeout: 4000 });
-  };
+  public async close() {
+    return await this._conn.end({ timeout: 4_000 });
+  }
 }

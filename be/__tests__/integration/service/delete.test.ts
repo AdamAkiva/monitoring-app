@@ -21,7 +21,7 @@ describe('Delete tests', () => {
       {
         name: 'SERVICE_DELETE_1',
         uri: 'https://SERVICE_DELETE_1.com',
-        monitorInterval: 20,
+        monitorInterval: 500,
         thresholds: [
           {
             lowerLimit: 0,

@@ -14,7 +14,7 @@ export default class WebsocketInstance {
     this._attachEventHandlers();
   }
 
-  private readonly _attachEventHandlers = () => {
+  private _attachEventHandlers() {
     this._handler.addEventListener('open', () => {
       console.log('Socket connection established');
     });
@@ -29,5 +29,5 @@ export default class WebsocketInstance {
         (JSON.parse(e.data) as { serviceId: string; reqTime: number }).reqTime
       );
     });
-  };
+  }
 }

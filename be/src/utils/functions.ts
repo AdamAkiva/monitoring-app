@@ -1,6 +1,6 @@
-import { ERR_CODES } from '../db/handler.js';
 import { pg, type Request } from '../types/index.js';
-import { STATUS } from './constants.js';
+
+import { ERR_CODES, STATUS } from './constants.js';
 import MonitoringAppError from './error.js';
 
 /**********************************************************************************/
@@ -38,7 +38,7 @@ export const sanitizeError = (
 ) => {
   if (err instanceof pg.PostgresError) {
     switch (err.code) {
-      case ERR_CODES.UNIQUE_VIOLATION:
+      case ERR_CODES.PG.UNIQUE_VIOLATION:
         if (entity) {
           return new MonitoringAppError(
             `${entity.type} '${entity.name}' already exists'`,

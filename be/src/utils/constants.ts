@@ -54,3 +54,15 @@ export const VALIDATION = {
   THRESHOLD_MIN_VALUE: 0,
   THRESHOLD_MAX_VAL: Number.MAX_SAFE_INTEGER
 } as const;
+
+export const ERR_CODES = {
+  WS: {
+    // See: https://datatracker.ietf.org/doc/html/rfc6455#section-7.4.1
+    SERVER_CLOSED: 1001
+  },
+  PG: {
+    // See: https://www.postgresql.org/docs/current/errcodes-appendix.html
+    FOREIGN_KEY_VIOLATION: '23503',
+    UNIQUE_VIOLATION: '23505'
+  }
+};

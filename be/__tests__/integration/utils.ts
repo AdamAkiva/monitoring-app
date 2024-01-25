@@ -8,7 +8,8 @@ import {
   describe,
   expect,
   inject,
-  it
+  it,
+  vi
 } from 'vitest';
 
 import type {
@@ -149,5 +150,6 @@ export {
   inject,
   it,
   randomUUID,
+  vi,
   type Service
 };

@@ -27,7 +27,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_1',
           uri: 'https://SERVICE_UPDATE_1.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -60,7 +60,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_3',
           uri: 'https://SERVICE_UPDATE_3.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -95,7 +95,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_4',
           uri: 'https://SERVICE_UPDATE_4.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -130,7 +130,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_6',
           uri: 'https://SERVICE_UPDATE_6.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -167,7 +167,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_7',
           uri: 'https://SERVICE_UPDATE_7.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -182,7 +182,7 @@ describe('Update tests', () => {
         const [{ id: serviceId }] = await createServices([serviceData]);
 
         const updateData: UpdateService = {
-          monitorInterval: 30
+          monitorInterval: 1_000
         };
         const res = await sendHttpRequest<Service>(
           `${serviceRouteURL}/${serviceId}`,
@@ -202,7 +202,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_8',
           uri: 'https://SERVICE_UPDATE_8.com',
-          monitorInterval: 30,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -217,7 +217,7 @@ describe('Update tests', () => {
         const [{ id: serviceId }] = await createServices([serviceData]);
 
         const updateData: UpdateService = {
-          monitorInterval: 30
+          monitorInterval: 1_000
         };
         const res = await sendHttpRequest<Service>(
           `${serviceRouteURL}/${serviceId}`,
@@ -239,7 +239,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_9',
           uri: 'https://SERVICE_UPDATE_9.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -277,7 +277,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_11',
           uri: 'https://SERVICE_UPDATE_11.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -312,7 +312,7 @@ describe('Update tests', () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_12',
           uri: 'https://SERVICE_UPDATE_12.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -354,7 +354,7 @@ describe('Update tests', () => {
         {
           name: 'SERVICE_UPDATE_13',
           uri: 'https://SERVICE_UPDATE_13.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -380,7 +380,7 @@ describe('Update tests', () => {
         {
           name: 'SERVICE_UPDATE_14',
           uri: 'https://SERVICE_UPDATE_14.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -395,7 +395,7 @@ describe('Update tests', () => {
         {
           name: 'SERVICE_UPDATE_15',
           uri: 'https://SERVICE_UPDATE_15.com',
-          monitorInterval: 20,
+          monitorInterval: 1_000,
           thresholds: [
             {
               lowerLimit: 0,
@@ -424,7 +424,7 @@ describe('Update tests', () => {
         {
           name: 'SERVICE_UPDATE_16',
           uri: 'https://SERVICE_UPDATE_16.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -476,7 +476,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_19',
             uri: 'https://SERVICE_UPDATE_19.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -505,7 +505,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_20',
             uri: 'https://SERVICE_UPDATE_20.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -538,7 +538,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_21',
             uri: 'https://SERVICE_UPDATE_21.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -567,7 +567,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_22',
             uri: 'https://SERVICE_UPDATE_22.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -600,7 +600,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_23',
             uri: 'https://SERVICE_UPDATE_23.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -629,7 +629,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_24',
             uri: 'https://SERVICE_UPDATE_24.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -660,7 +660,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_25',
             uri: 'https://SERVICE_UPDATE_25.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -693,7 +693,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_26',
             uri: 'https://SERVICE_UPDATE_26.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -723,7 +723,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_27',
               uri: 'https://SERVICE_UPDATE_27.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -752,7 +752,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_28',
               uri: 'https://SERVICE_UPDATE_28.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -788,7 +788,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_29',
               uri: 'https://SERVICE_UPDATE_29.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -826,7 +826,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_30',
               uri: 'https://SERVICE_UPDATE_30.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -855,7 +855,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_31',
               uri: 'https://SERVICE_UPDATE_31.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -891,7 +891,7 @@ describe('Update tests', () => {
             {
               name: 'SERVICE_UPDATE_32',
               uri: 'https://SERVICE_UPDATE_32.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -928,7 +928,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_33',
             uri: 'https://SERVICE_UPDATE_33.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -959,7 +959,7 @@ describe('Update tests', () => {
           {
             name: 'SERVICE_UPDATE_34',
             uri: 'https://SERVICE_UPDATE_34.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,

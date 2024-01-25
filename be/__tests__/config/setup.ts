@@ -1,4 +1,4 @@
-import { HttpServer } from '../../src/server/index.js';
+import { HttpServer, MonitoredApps } from '../../src/server/index.js';
 import { logger } from '../../src/utils/index.js';
 
 /**********************************************************************************/
@@ -7,7 +7,6 @@ type Provide = { provide: (key: string, value: unknown) => void };
 
 /**********************************************************************************/
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setup = async ({ provide }: Provide) => {
   const { mode, server: serverEnv, db: dbUri } = getTestEnv();
 
@@ -16,9 +15,11 @@ export const setup = async ({ provide }: Provide) => {
     healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.healthCheckRoute}`
   });
 
+  const monitoredApps = new MonitoredApps();
   const server = await HttpServer.create({
     mode: mode,
     dbData: { name: 'monitoring-app-pg-test', uri: dbUri },
+    monitoredApps: monitoredApps,
     routes: {
       api: `/${serverEnv.apiRoute}`,
       health: `/${serverEnv.healthCheckRoute}`
@@ -29,9 +30,9 @@ export const setup = async ({ provide }: Provide) => {
   server.listen(serverEnv.port);
 
   return async () => {
-    const { getHandler, getModels } = server.getDatabase();
-    const handler = getHandler();
-    const models = getModels();
+    const db = server.getDatabase();
+    const handler = db.getHandler();
+    const models = db.getModels();
 
     /* eslint-disable drizzle/enforce-delete-with-where */
     await handler.delete(models.serviceModel);

@@ -1,4 +1,4 @@
-import { HttpServer } from './server/index.js';
+import { HttpServer, MonitoredApps, WebSocketServer } from './server/index.js';
 import { EventEmitter } from './types/index.js';
 import { getEnv, logger } from './utils/index.js';
 
@@ -9,9 +9,11 @@ const startServer = async () => {
 
   const { mode, server: serverEnv, db: dbUri } = getEnv();
 
+  const monitoredApps = new MonitoredApps();
   const server = await HttpServer.create({
     mode: mode,
     dbData: { name: `monitoring-app-postgres-${mode}`, uri: dbUri },
+    monitoredApps: monitoredApps,
     routes: {
       api: `/${serverEnv.apiRoute}`,
       health: `/${serverEnv.healthCheckRoute}`
@@ -26,7 +28,13 @@ const startServer = async () => {
     logger.warn(err);
   });
 
-  server.listen(serverEnv.port);
+  void new WebSocketServer(server.getHandler(), monitoredApps);
+  server.listen(serverEnv.port, () => {
+    logger.info(
+      `Server is running in '${mode}' mode on:` +
+        ` ${serverEnv.url}:${serverEnv.port}/${serverEnv.apiRoute}`
+    );
+  });
 };
 
 const globalErrorHandler = (

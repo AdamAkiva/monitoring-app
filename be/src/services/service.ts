@@ -34,7 +34,7 @@ export const createOne = async (
   service: ServiceCreateOneValidationData
 ): Promise<Service> => {
   try {
-    const { db, wss } = req.monitoringApp;
+    const { db } = req.monitoringApp;
     const handler = db.getHandler();
     const { serviceModel, thresholdModel } = db.getModels();
 
@@ -56,12 +56,6 @@ export const createOne = async (
         };
       })
     );
-
-    wss.upsertMonitoredService(serviceId, {
-      name: service.name,
-      uri: service.uri,
-      interval: service.monitorInterval
-    });
 
     return {
       id: serviceId,
@@ -93,7 +87,7 @@ export const updateOne = async (
           transaction: transaction
         }),
         updateService({
-          req: req,
+          db: db,
           serviceUpdates: serviceUpdates,
           serviceId: serviceId,
           transaction: transaction
@@ -138,7 +132,7 @@ export const deleteOne = async (
   id: ServiceDeleteOneValidationData
 ): Promise<string> => {
   try {
-    const { db, wss } = req.monitoringApp;
+    const { db } = req.monitoringApp;
     const handler = db.getHandler();
     const { serviceModel } = db.getModels();
 
@@ -149,8 +143,6 @@ export const deleteOne = async (
         id: serviceModel.id
       });
     if (deletedServices.length) {
-      wss.deleteMonitoredService(deletedServices[0].id);
-
       return deletedServices[0].id;
     }
 
@@ -238,20 +230,19 @@ const findServiceToUpdate = async (params: {
 };
 
 const updateService = async (params: {
-  req: Request;
+  db: DatabaseHandler;
   serviceUpdates: Omit<ServiceUpdateOneValidationData, 'id' | 'thresholds'>;
   serviceId: string;
   transaction: Transaction;
 }) => {
-  const { req, serviceUpdates, serviceId, transaction } = params;
-  const { db, wss } = req.monitoringApp;
+  const { db, serviceUpdates, serviceId, transaction } = params;
   const { serviceModel } = db.getModels();
 
   if (!Object.keys(serviceUpdates).length) {
     return await Promise.resolve();
   }
 
-  const services = await transaction
+  await transaction
     .update(serviceModel)
     .set(serviceUpdates)
     .where(eq(serviceModel.id, serviceId))
@@ -260,13 +251,6 @@ const updateService = async (params: {
       uri: serviceModel.uri,
       interval: serviceModel.monitorInterval
     });
-  if (services.length) {
-    wss.upsertMonitoredService(serviceId, {
-      name: services[0].name,
-      uri: services[0].uri,
-      interval: services[0].interval
-    });
-  }
 };
 
 const updateServiceThresholds = async (params: {
