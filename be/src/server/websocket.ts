@@ -2,7 +2,7 @@ import {
   WebSocket,
   WebSocketServer,
   ky,
-  setTimeout,
+  setTimeoutAsync,
   type Server,
   type ServiceData
 } from '../types/index.js';
@@ -80,7 +80,7 @@ export default class {
     if (!service) {
       return await Promise.resolve();
     }
-    await setTimeout(service.interval);
+    await setTimeoutAsync(service.interval);
     this._monitorCheckCallback(serviceId, service.uri);
   }
 

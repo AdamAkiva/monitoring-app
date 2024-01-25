@@ -9,10 +9,11 @@ type Provide = { provide: (key: string, value: unknown) => void };
 
 export const setup = async ({ provide }: Provide) => {
   const { mode, server: serverEnv, db: dbUri } = getTestEnv();
+  const healthCheckRoute = serverEnv.healthCheck.route;
 
   provide('urls', {
     baseURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.apiRoute}`,
-    healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.healthCheckRoute}`
+    healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${healthCheckRoute}`
   });
 
   const monitoredApps = new MonitoredApps();
@@ -22,9 +23,10 @@ export const setup = async ({ provide }: Provide) => {
     monitoredApps: monitoredApps,
     routes: {
       api: `/${serverEnv.apiRoute}`,
-      health: `/${serverEnv.healthCheckRoute}`
+      health: `/${healthCheckRoute}`
     },
-    allowedOrigins: []
+    allowedHosts: new Set(),
+    allowedOrigins: new Set()
   });
 
   server.listen(serverEnv.port);
@@ -57,7 +59,11 @@ export const getTestEnv = () => {
       base: 'http://localhost',
       port: process.env.TEST_SERVER_PORT!,
       apiRoute: process.env.API_ROUTE!,
-      healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!
+      healthCheck: {
+        route: process.env.HEALTH_CHECK_ROUTE!,
+        allowedHosts: new Set(process.env.ALLOWED_HOSTS!.split(','))
+      },
+      allowedOrigins: new Set(process.env.ALLOWED_ORIGINS!.split(','))
     },
     db: process.env.TEST_DB_URI!
   };
@@ -99,6 +105,8 @@ const checkMissingEnvVariables = () => {
     ['TEST_SERVER_PORT', `Missing 'TEST_SERVER_PORT', env variable`],
     ['API_ROUTE', `Missing 'API_ROUTE', env variable`],
     ['HEALTH_CHECK_ROUTE', `Missing 'HEALTH_CHECK_ROUTE', env variable`],
+    ['ALLOWED_HOSTS', `Missing 'ALLOWED_HOSTS', env variable`],
+    ['ALLOWED_ORIGINS', `Missing 'ALLOWED_ORIGINS', env variable`],
     ['TEST_DB_URI', `Missing 'TEST_DB_URI', env variable`]
   ]);
 };

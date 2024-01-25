@@ -27,7 +27,6 @@
 !*.sh
 !*.md
 !*.yml
-!*.yaml
 !Dockerfile
 !.gitignore
 

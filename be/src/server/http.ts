@@ -27,9 +27,17 @@ export default class HttpServer {
     monitoredApps: MonitoredApps;
     dbData: { name: string; uri: string };
     routes: { api: string; health: string };
-    allowedOrigins: string[] | string;
+    allowedHosts: Set<string>;
+    allowedOrigins: Set<string>;
   }) {
-    const { mode, monitoredApps, dbData, routes, allowedOrigins } = params;
+    const {
+      mode,
+      monitoredApps,
+      dbData,
+      routes,
+      allowedHosts,
+      allowedOrigins
+    } = params;
 
     let db: DatabaseHandler | null = null;
     let server: Server | null = null;
@@ -45,7 +53,7 @@ export default class HttpServer {
 
       HttpServer._attachConfigurations(server);
 
-      app.disable('x-powered-by');
+      app.disable('etag').disable('x-powered-by');
 
       const allowedMethods = new Set<string>([
         'HEAD',
@@ -67,8 +75,8 @@ export default class HttpServer {
       } else {
         HttpServer._attachMiddleware({
           app: app,
-          allowedOrigins: allowedOrigins,
-          allowedMethods: allowedMethods
+          allowedMethods: allowedMethods,
+          allowedOrigins: allowedOrigins
         });
       }
 
@@ -77,6 +85,7 @@ export default class HttpServer {
         app: app,
         db: db,
         monitoredApps: monitoredApps,
+        allowedHosts: allowedHosts,
         routes: routes
       });
     } catch (err) {
@@ -115,7 +124,7 @@ export default class HttpServer {
   private static async _attachMiddlewareProd(params: {
     app: Application;
     allowedMethods: Set<string>;
-    allowedOrigins: string[] | string;
+    allowedOrigins: Set<string>;
   }) {
     const { app, allowedMethods, allowedOrigins } = params;
 
@@ -126,8 +135,8 @@ export default class HttpServer {
     app.use(
       Middlewares.checkMethod(allowedMethods),
       cors({
-        origin: allowedOrigins,
-        methods: Array.from(allowedMethods)
+        methods: Array.from(allowedMethods),
+        origin: Array.from(allowedOrigins)
       }),
       helmet.default({
         contentSecurityPolicy: true /* require-corp */,
@@ -154,14 +163,14 @@ export default class HttpServer {
   private static _attachMiddleware(params: {
     app: Application;
     allowedMethods: Set<string>;
-    allowedOrigins: string[] | string;
+    allowedOrigins: Set<string>;
   }) {
     const { app, allowedMethods, allowedOrigins } = params;
 
     app.use(
       cors({
-        origin: allowedOrigins,
-        methods: Array.from(allowedMethods)
+        methods: Array.from(allowedMethods),
+        origin: Array.from(allowedOrigins)
       }),
       Middlewares.checkMethod(allowedMethods),
       compress()
@@ -173,6 +182,7 @@ export default class HttpServer {
     app: Application;
     db: DatabaseHandler;
     monitoredApps: MonitoredApps;
+    allowedHosts: Set<string>;
     routes: { api: string; health: string };
   }) {
     const {
@@ -180,6 +190,7 @@ export default class HttpServer {
       app,
       db,
       monitoredApps,
+      allowedHosts,
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
@@ -189,7 +200,7 @@ export default class HttpServer {
 
     app.get(
       healthCheckRoute,
-      Middlewares.healthCheck(async () => {
+      Middlewares.healthCheck(allowedHosts, async () => {
         let notReadyMsg = '';
         try {
           await db.getHandler().execute(sql`SELECT NOW()`);

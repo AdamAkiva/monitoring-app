@@ -14,12 +14,12 @@ import {
 
 /**********************************************************************************/
 
-describe('Create tests', () => {
+describe.concurrent('Create tests', () => {
   const { baseURL } = inject('urls');
   const serviceRouteURL = `${baseURL}/services`;
 
   describe('Valid', () => {
-    it.concurrent('With name', async () => {
+    it('With name', async () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_1',
         uri: 'https://SERVICE_CREATE_1.com',
@@ -39,7 +39,7 @@ describe('Create tests', () => {
       expect(res.statusCode).toBe(STATUS.CREATED.CODE);
       checkMatchIgnoringOrder([serviceData], [omit(res.data, 'id')]);
     });
-    it.concurrent('Without name', async () => {
+    it('Without name', async () => {
       const serviceData: CreateService = {
         uri: 'https://SERVICE_CREATE_2.com',
         monitorInterval: 500,
@@ -58,7 +58,7 @@ describe('Create tests', () => {
       expect(res.statusCode).toBe(STATUS.CREATED.CODE);
       checkMatchIgnoringOrder([serviceData], [omit(res.data, 'id')]);
     });
-    it.concurrent('With unicode name', async () => {
+    it('With unicode name', async () => {
       const serviceData: CreateService = {
         name: '1בלה',
         uri: 'https://SERVICE_CREATE_3.com',
@@ -78,7 +78,7 @@ describe('Create tests', () => {
       expect(res.statusCode).toBe(STATUS.CREATED.CODE);
       checkMatchIgnoringOrder([serviceData], [omit(res.data, 'id')]);
     });
-    it.concurrent('With one threshold', async () => {
+    it('With one threshold', async () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_4',
         uri: 'https://SERVICE_CREATE_4.com',
@@ -98,7 +98,7 @@ describe('Create tests', () => {
       expect(res.statusCode).toBe(STATUS.CREATED.CODE);
       checkMatchIgnoringOrder([serviceData], [omit(res.data, 'id')]);
     });
-    it.concurrent('With multiple thresholds', async () => {
+    it('With multiple thresholds', async () => {
       const serviceData: CreateService = {
         name: 'SERVICE_CREATE_5',
         uri: 'https://SERVICE_CREATE_5.com',
@@ -128,7 +128,7 @@ describe('Create tests', () => {
     });
   });
   describe('Invalid', () => {
-    it.concurrent('Duplicate', async () => {
+    it('Duplicate', async () => {
       const serviceData: CreateService = {
         uri: 'https://SERVICE_CREATE_6.com',
         monitorInterval: 500,
@@ -154,7 +154,7 @@ describe('Create tests', () => {
 
       expect(statusCode).toBe(STATUS.CONFLICT.CODE);
     });
-    it.concurrent('With excess fields', async () => {
+    it('With excess fields', async () => {
       const serviceData = {
         uri: 'https://SERVICE_CREATE_7.com',
         monitorInterval: 500,
@@ -174,7 +174,7 @@ describe('Create tests', () => {
       expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
     });
     describe('Name', () => {
-      it.concurrent('Empty value', async () => {
+      it('Empty value', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -192,7 +192,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too long', async () => {
+      it('Too long', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -212,7 +212,7 @@ describe('Create tests', () => {
       });
     });
     describe('Uri', () => {
-      it.concurrent('Empty value', async () => {
+      it('Empty value', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -230,7 +230,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too long', async () => {
+      it('Too long', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -248,7 +248,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Not supplied', async () => {
+      it('Not supplied', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -267,7 +267,7 @@ describe('Create tests', () => {
       });
     });
     describe('Monitor interval', () => {
-      it.concurrent('Invalid type', async () => {
+      it('Invalid type', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -285,7 +285,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too low', async () => {
+      it('Too low', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -303,7 +303,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too high', async () => {
+      it('Too high', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -323,7 +323,7 @@ describe('Create tests', () => {
       });
     });
     describe('Thresholds', () => {
-      it.concurrent('Invalid type', async () => {
+      it('Invalid type', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -337,7 +337,7 @@ describe('Create tests', () => {
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
       describe('Lower limit', () => {
-        it.concurrent('Invalid type', async () => {
+        it('Invalid type', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -355,7 +355,7 @@ describe('Create tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too low', async () => {
+        it('Too low', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -373,7 +373,7 @@ describe('Create tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too high', async () => {
+        it('Too high', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -393,7 +393,7 @@ describe('Create tests', () => {
         });
       });
       describe('Upper limit', () => {
-        it.concurrent('Invalid type', async () => {
+        it('Invalid type', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -411,7 +411,7 @@ describe('Create tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too low', async () => {
+        it('Too low', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -429,7 +429,7 @@ describe('Create tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too high', async () => {
+        it('Too high', async () => {
           const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
             method: 'POST',
             json: {
@@ -448,7 +448,7 @@ describe('Create tests', () => {
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
       });
-      it.concurrent('Lower limit equal to upper limit', async () => {
+      it('Lower limit equal to upper limit', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {
@@ -466,7 +466,7 @@ describe('Create tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Lower limit larger than upper limit', async () => {
+      it('Lower limit larger than upper limit', async () => {
         const { statusCode } = await sendHttpRequest<never>(serviceRouteURL, {
           method: 'POST',
           json: {

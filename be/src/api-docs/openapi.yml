@@ -62,6 +62,8 @@ paths:
             type: string
             format: uuid
             example: adb3271f-94dc-4169-80e9-3d4c8a90201f
+      requestBody:
+        $ref: '#/components/requestBodies/ServiceUpdateObj'
       responses:
         '200':
           $ref: '#/components/responses/Service'
@@ -116,6 +118,7 @@ components:
     ServiceCreationObj:
       type: object
       required:
+        - name
         - uri
         - monitorInterval
         - thresholds
@@ -151,7 +154,7 @@ components:
                 description: >
                   Milliseconds representing the upper limit for the threshold check
                 example: 50
-    ServiceUpdatesObj:
+    ServiceUpdateObj:
       type: object
       properties:
         name:
@@ -234,13 +237,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ServiceCreationObj'
-    ServiceUpdatesObj:
+    ServiceUpdateObj:
       description: An object of monitored service updates
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ServiceUpdatesObj'
+            $ref: '#/components/schemas/ServiceUpdateObj'
   responses:
     Service:
       description: A monitored service object

@@ -12,11 +12,11 @@ import {
 
 /**********************************************************************************/
 
-describe('Delete tests', () => {
+describe.concurrent('Delete tests', () => {
   const { baseURL } = inject('urls');
   const serviceRouteURL = `${baseURL}/services`;
 
-  it.concurrent('Valid', async () => {
+  it('Valid', async () => {
     const servicesData: CreateService[] = [
       {
         name: 'SERVICE_DELETE_1',
@@ -45,7 +45,7 @@ describe('Delete tests', () => {
     expect(res.data).toStrictEqual(serviceId);
   });
   describe('Invalid', () => {
-    it.concurrent('Missing service id', async () => {
+    it('Missing service id', async () => {
       const { statusCode } = await sendHttpRequest<never>(
         `${serviceRouteURL}/`,
         { method: 'delete' }
@@ -53,7 +53,7 @@ describe('Delete tests', () => {
 
       expect(statusCode).toBe(STATUS.NOT_FOUND.CODE);
     });
-    it.concurrent('Invalid service id', async () => {
+    it('Invalid service id', async () => {
       const { statusCode } = await sendHttpRequest<never>(
         `${serviceRouteURL}/abcdefg12345`,
         { method: 'delete' }
@@ -61,7 +61,7 @@ describe('Delete tests', () => {
 
       expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
     });
-    it.concurrent('Non-existent service id', async () => {
+    it('Non-existent service id', async () => {
       const { statusCode } = await sendHttpRequest<never>(
         `${serviceRouteURL}/${randomUUID()}`,
         { method: 'delete' }

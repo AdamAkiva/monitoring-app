@@ -22,7 +22,10 @@ export const checkMethod = (allowedMethods: Set<string>) => {
   };
 };
 
-export const healthCheck = (isReadyCallback: () => Promise<string>) => {
+export const healthCheck = (
+  allowedHosts: Set<string>,
+  isReadyCallback: () => Promise<string>
+) => {
   return async (req: Request, res: Response) => {
     if (strcasecmp(req.method, 'GET')) {
       return res
@@ -30,10 +33,8 @@ export const healthCheck = (isReadyCallback: () => Promise<string>) => {
         .json(`Health check must be a 'GET' request`);
     }
 
-    // TODO Add the hostname for every allowed server when it is ready
-    // (e.g NGINX, ingress, Apache, etc...)
-    const allowedHosts = new Set<string>(['localhost']);
-    if (!allowedHosts.has(req.hostname)) {
+    const hostName = req.hostname.toLowerCase();
+    if (!allowedHosts.has(hostName)) {
       return res.status(STATUS.FORBIDDEN.CODE).json(STATUS.FORBIDDEN.MSG);
     }
 

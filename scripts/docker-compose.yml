@@ -69,6 +69,7 @@ services:
       - SERVER_URL=http://localhost
       - API_ROUTE=v0/api
       - HEALTH_CHECK_ROUTE=health
+      - ALLOWED_HOSTS=localhost
       - ALLOWED_ORIGINS=http://localhost:4502
       - DB_URI=postgres://admin:admin@monitoring-app-pg-dev:5432/monitoring-app-dev
       - TEST_DB_URI=postgres://admin:admin@monitoring-app-pg-test:5432/monitoring-app-test

@@ -2,24 +2,12 @@ import { EventEmitter } from 'node:events';
 import { createServer, type Server } from 'node:http';
 import { hostname, machine, platform, release } from 'node:os';
 import { pid, version } from 'node:process';
-import { setTimeout } from 'node:timers/promises';
+import { setTimeout as setTimeoutAsync } from 'node:timers/promises';
 import { URL } from 'node:url';
 
 import compress from 'compression';
 import cors from 'cors';
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  inArray,
-  isNotNull,
-  isNull,
-  ne,
-  notInArray,
-  sql,
-  SQL
-} from 'drizzle-orm';
+import { eq, sql, SQL } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import express, {
   json,
@@ -37,6 +25,8 @@ import type qs from 'qs';
 import type { JsonObject } from 'swagger-ui-express';
 import { WebSocket, WebSocketServer } from 'ws';
 import { z as Zod } from 'zod';
+
+import type { Service } from './types.js';
 
 /**********************************************************************************/
 
@@ -60,61 +50,37 @@ export type EnvironmentVariables = {
     port: string;
     url: string;
     apiRoute: string;
-    healthCheckRoute: string;
-    allowedOrigins: string[] | string;
+    healthCheck: { route: string; allowedHosts: Set<string> };
+    allowedOrigins: Set<string>;
   };
   db: string;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ResolvedValue<T> = T extends (...args: any) => any
-  ? PromiseFulfilledResult<Awaited<ReturnType<T>>>
-  : PromiseFulfilledResult<Awaited<T>>;
 
 /**********************************************************************************/
 
 export type ServiceData = { name: string; uri: string; interval: number };
 
-export type Service = {
-  id: string;
-  name: string;
-  uri: string;
-  monitorInterval: number;
-  thresholds: {
-    lowerLimit: number;
-    upperLimit: number;
-  }[];
-};
-
 /**********************************************************************************/
 
 export {
-  and,
-  asc,
   compress,
   cors,
   createServer,
-  desc,
   drizzle,
   eq,
   EventEmitter,
   express,
   hostname,
-  inArray,
-  isNotNull,
-  isNull,
   json,
   ky,
   machine,
-  ne,
-  notInArray,
   pg,
   pid,
   pinoHttp,
   platform,
   release,
   Router,
-  setTimeout,
+  setTimeoutAsync,
   SQL,
   sql,
   URL,
@@ -128,5 +94,6 @@ export {
   type KyOptions,
   type NextFunction,
   type Response,
-  type Server
+  type Server,
+  type Service
 };

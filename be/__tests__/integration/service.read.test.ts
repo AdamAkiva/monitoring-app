@@ -13,12 +13,12 @@ import {
 
 /**********************************************************************************/
 
-describe('Read tests', () => {
+describe.concurrent('Read tests', () => {
   const { baseURL } = inject('urls');
   const serviceRouteURL = `${baseURL}/services`;
 
   describe('Valid', () => {
-    it.concurrent('Valid', async () => {
+    it('Valid', async () => {
       const servicesData: CreateService[] = [
         {
           name: 'SERVICE_READ_1',

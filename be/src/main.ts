@@ -16,8 +16,9 @@ const startServer = async () => {
     monitoredApps: monitoredApps,
     routes: {
       api: `/${serverEnv.apiRoute}`,
-      health: `/${serverEnv.healthCheckRoute}`
+      health: `/${serverEnv.healthCheck.route}`
     },
+    allowedHosts: serverEnv.healthCheck.allowedHosts,
     allowedOrigins: serverEnv.allowedOrigins
   });
 
