@@ -1,6 +1,7 @@
 import {
-  CiTrash,
-  MdEdit,
+  DeleteIcon,
+  EditIcon,
+  IconButton,
   useCallback,
   useState,
   type Service,
@@ -9,8 +10,6 @@ import {
 import { SUPPORTED_COLORS } from '@/utils';
 
 import SubmitForm from './SubmitForm.tsx';
-
-import './Card.css';
 
 /**********************************************************************************/
 
@@ -71,10 +70,15 @@ export default function Card({
       ) : null}
       <div className="card-header">
         <div className="card-header-modification">
-          <button type="button" onClick={openForm}>
-            <MdEdit />
-          </button>
-          <button
+          <IconButton
+            aria-label="Edit service"
+            type="button"
+            onClick={openForm}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label="Delete service"
             type="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -82,8 +86,8 @@ export default function Card({
               handleDeleteClick();
             }}
           >
-            <CiTrash />
-          </button>
+            <DeleteIcon />
+          </IconButton>
         </div>
         <div className="card-header-title" onClick={handleCardClick}>
           <b>Name:</b> {service.name}

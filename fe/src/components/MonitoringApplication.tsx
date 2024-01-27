@@ -7,6 +7,10 @@ import {
   updateService
 } from '@/api';
 import {
+  Box,
+  Container,
+  Grid,
+  Stack,
   useCallback,
   useEffect,
   useRef,
@@ -101,18 +105,23 @@ export default function MonitoringApplication() {
     const serviceLatency = latencyMap.get(service.id) ?? -1;
 
     return (
-      <Card
-        key={service.id}
-        service={service}
-        latency={serviceLatency}
-        onCardClick={handleCardClick}
-        onSubmitForm={handleServiceUpdate}
-        onDeleteClick={handleServiceDelete}
-      />
+      <Grid key={service.id} xs={12} sm={8} md={4} lg={4} xl={2}>
+        <Card
+          service={service}
+          latency={serviceLatency}
+          onCardClick={handleCardClick}
+          onSubmitForm={handleServiceUpdate}
+          onDeleteClick={handleServiceDelete}
+        />
+      </Grid>
     );
   });
   // There will always be a single AddCard, so its id can be static
-  bodyCards.push(<AddCard key={-1} onSubmitForm={handleServiceCreation} />);
+  bodyCards.push(
+    <Grid key={-1} xs={12} sm={8} md={4} lg={4} xl={2}>
+      <AddCard onSubmitForm={handleServiceCreation} />
+    </Grid>
+  );
 
   const headerData = {
     headerInformation: (
@@ -132,12 +141,27 @@ export default function MonitoringApplication() {
   };
 
   return (
-    <div className="app">
-      <div className="header">
+    <Container>
+      <Stack
+        direction={'row'}
+        spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 16 }}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
         {headerData.headerInformation}
         {headerData.headerThresholds}
-      </div>
-      <div className="body">{bodyCards}</div>
-    </div>
+      </Stack>
+      <Box sx={{ flexGrow: 1, mt: 10 }}>
+        <Grid
+          container={true}
+          spacing={{ xs: 2, sm: 2, md: 4, lg: 8, xl: 8 }}
+          flexWrap={'wrap'}
+        >
+          {bodyCards}
+        </Grid>
+      </Box>
+    </Container>
   );
 }

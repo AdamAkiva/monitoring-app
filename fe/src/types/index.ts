@@ -1,3 +1,18 @@
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon
+} from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Card,
+  Container,
+  IconButton,
+  Stack,
+  Typography
+} from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import ky, { type Options as KyOptions } from 'ky';
 import React, {
   useCallback,
@@ -8,9 +23,6 @@ import React, {
   type SetStateAction
 } from 'react';
 import ReactDOM from 'react-dom/client';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { CiTrash } from 'react-icons/ci';
-import { MdEdit } from 'react-icons/md';
 import { v4 as randomUUID } from 'uuid';
 
 import type { Service, ServiceCreationObj as UpsertService } from './api.ts';
@@ -27,11 +39,19 @@ export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 /**********************************************************************************/
 
 export {
-  AiOutlinePlus,
-  CiTrash,
-  MdEdit,
+  AddIcon,
+  Box,
+  Button,
+  Card,
+  Container,
+  DeleteIcon,
+  EditIcon,
+  Grid,
+  IconButton,
   React,
   ReactDOM,
+  Stack,
+  Typography,
   ky,
   randomUUID,
   useCallback,

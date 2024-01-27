@@ -1,4 +1,4 @@
-.app {
+/* .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -17,7 +17,7 @@
   margin: 5px 50px;
   gap: 50px 75px;
   grid-template-columns: auto auto auto;
-}
+} */
 
 div {
   border: solid gray 1px;

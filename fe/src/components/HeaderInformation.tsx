@@ -1,4 +1,4 @@
-import './HeaderInformation.css';
+import { Stack, Typography } from '@/types';
 
 /**********************************************************************************/
 
@@ -16,19 +16,41 @@ export default function HeaderInformation({
   interval
 }: HeaderInformationProps) {
   return (
-    <div className="header-information">
-      <div className="header-information-row">
-        <div className="header-information-key">Name:</div>
-        <div className="header-information-key">URI:</div>
-        <div className="header-information-key">Interval:</div>
-      </div>
-      <div className="header-information-row">
-        <div className="header-information-value">{name}</div>
-        <div className="header-information-value">{uri}</div>
-        <div className="header-information-value">
+    <Stack
+      direction={'row'}
+      sx={{
+        width: '100%',
+        maxWidth: 400,
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      <Stack
+        direction={'column'}
+        spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
+        sx={{ justifyContent: 'left', alignItems: 'left', mr: 1.5 }}
+      >
+        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          Name:
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          URI:
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          Interval:
+        </Typography>
+      </Stack>
+      <Stack
+        direction={'column'}
+        spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
+        sx={{ justifyContent: 'left', alignItems: 'left' }}
+      >
+        <Typography variant="body1">{name}</Typography>
+        <Typography variant="body1">{uri}</Typography>
+        <Typography variant="body1">
           {interval.length ? `${interval}ms` : null}
-        </div>
-      </div>
-    </div>
+        </Typography>
+      </Stack>
+    </Stack>
   );
 }

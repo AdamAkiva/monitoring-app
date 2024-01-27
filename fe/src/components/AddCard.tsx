@@ -1,13 +1,12 @@
 import {
-  AiOutlinePlus,
+  AddIcon,
+  IconButton,
   useCallback,
   useState,
   type UpsertService
 } from '@/types';
 
 import SubmitForm from './SubmitForm.tsx';
-
-import './AddCard.css';
 
 /**********************************************************************************/
 
@@ -28,10 +27,10 @@ export default function AddCard({ onSubmitForm }: AddCardProps) {
   }, []);
 
   return (
-    <div className="add-card">
-      <button type="button" className="add-card" onClick={openForm}>
-        <AiOutlinePlus />
-      </button>
+    <>
+      <IconButton type="button" aria-label="Add new service" onClick={openForm}>
+        <AddIcon />
+      </IconButton>
       {showForm ? (
         <SubmitForm
           onSubmitForm={onSubmitForm}
@@ -39,6 +38,6 @@ export default function AddCard({ onSubmitForm }: AddCardProps) {
           state={null}
         />
       ) : null}
-    </div>
+    </>
   );
 }

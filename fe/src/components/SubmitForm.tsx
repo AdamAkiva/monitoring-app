@@ -1,5 +1,7 @@
 import {
-  AiOutlinePlus,
+  AddIcon,
+  Button,
+  IconButton,
   useCallback,
   useEffect,
   useRef,
@@ -8,8 +10,6 @@ import {
   type UpsertService
 } from '@/types';
 import { DEFAULT_SERVICE_DATA_WITHOUT_ID } from '@/utils';
-
-import './SubmitForm.css';
 
 /**********************************************************************************/
 
@@ -110,8 +110,9 @@ export default function SubmitForm({
             });
           }}
         />
-        <AiOutlinePlus
-          className="plus-sign"
+        <IconButton
+          aria-label="Add new threshold row"
+          type="button"
           onClick={() => {
             setFormData((prevData) => {
               return {
@@ -127,7 +128,9 @@ export default function SubmitForm({
               };
             });
           }}
-        />
+        >
+          <AddIcon />
+        </IconButton>
       </div>
     );
   });
@@ -207,10 +210,10 @@ export default function SubmitForm({
         </div>
         <div className="form-thresholds">Thresholds:</div>
         {rows}
-        <button type="submit">Submit</button>
-        <button type="button" onClick={closeForm}>
+        <Button type="submit">Submit</Button>
+        <Button type="button" onClick={closeForm}>
           Close
-        </button>
+        </Button>
       </form>
     </div>
   );
