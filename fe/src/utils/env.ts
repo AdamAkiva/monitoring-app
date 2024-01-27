@@ -1,3 +1,7 @@
+import type { Mode } from '@/types';
+
+/**********************************************************************************/
+
 export const getEnvValue = (name: string) => {
   const envKey = `MONITORING_APP_${name}`;
 
@@ -9,6 +13,6 @@ export const getEnvValue = (name: string) => {
   return envValue;
 };
 
-export const getRuntimeMode = () => {
-  return import.meta.env.MODE;
+export const getRuntimeMode = (): Mode => {
+  return import.meta.env.MODE as Mode;
 };

@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 /*
   These rules should **not** conflict with prettier, such as spaces and new lines
   rules. Please refrain from doing rules for it, or you will encounter issues.
@@ -255,11 +253,6 @@ module.exports = {
         'react/destructuring-assignment': [2, 'always'],
         'react/display-name': 2,
         'react/forbid-prop-types': 2,
-        // Stylistic choice, feel free to change it to whatever
-        'react/function-component-definition': [
-          2,
-          { namedComponents: 'arrow-function' }
-        ],
         'react/hook-use-state': 2,
         'react/iframe-missing-sandbox': 2,
         'react/no-access-state-in-setstate': 2,

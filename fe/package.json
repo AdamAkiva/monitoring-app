@@ -4,10 +4,10 @@
   "type": "module",
   "main": "./src/main.tsx",
   "scripts": {
-    "start:dev": "vite",
+    "start:dev": "vite --mode development",
     "test": "printf 'No tests exist (yet)' && exit 1",
     "lint": "npx tsc --project ./tsconfig.json --noEmit && npx eslint \"src/**/*.{ts,tsx}\"",
-    "build": "npx eslint './src/**/*.tsx' && vite build",
+    "build": "npx eslint './src/**/*.tsx' && vite build --mode production",
     "check-global-updates": "npx ncu -g",
     "check-local-updates": "npx ncu",
     "commit-local-updates": "npx ncu -u",
@@ -18,12 +18,14 @@
     "react-icons": "~5.0.1",
     "ky": "~1.2.0",
     "react": "~18.2.0",
-    "react-dom": "~18.2.0"
+    "react-dom": "~18.2.0",
+    "uuid": "~9.0.1"
   },
   "devDependencies": {
     "@types/node": "~20.11.5",
     "@types/react": "~18.2.43",
     "@types/react-dom": "~18.2.17",
+    "@types/uuid": "~9.0.8",
     "@typescript-eslint/eslint-plugin": "~6.19.0",
     "@typescript-eslint/parser": "~6.19.0",
     "@vitejs/plugin-react-swc": "~3.5.0",

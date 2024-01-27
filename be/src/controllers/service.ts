@@ -28,7 +28,7 @@ export const createOne = async (
   try {
     const service = ServiceValidator.createOne(req);
     const createdService = await ServiceLayer.createOne(req, service);
-    req.monitoringApp.monitoredApps.upsert(createdService.id, {
+    req.monitoringApp.wss.insertMonitoredService(createdService.id, {
       name: createdService.name,
       uri: createdService.uri,
       interval: createdService.monitorInterval
@@ -48,7 +48,7 @@ export const updateOne = async (
   try {
     const serviceUpdates = ServiceValidator.updateOne(req);
     const updatedService = await ServiceLayer.updateOne(req, serviceUpdates);
-    req.monitoringApp.monitoredApps.upsert(updatedService.id, {
+    req.monitoringApp.wss.updateMonitoredService(updatedService.id, {
       name: updatedService.name,
       uri: updatedService.uri,
       interval: updatedService.monitorInterval
@@ -68,7 +68,7 @@ export const deleteOne = async (
   try {
     const serviceId = ServiceValidator.deleteOne(req);
     const deletedServiceId = await ServiceLayer.deleteOne(req, serviceId);
-    req.monitoringApp.monitoredApps.delete(deletedServiceId);
+    req.monitoringApp.wss.deleteMonitoredService(deletedServiceId);
 
     return res.status(STATUS.SUCCESS.CODE).json(deletedServiceId);
   } catch (err) {

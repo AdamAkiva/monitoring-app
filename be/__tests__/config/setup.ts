@@ -1,4 +1,4 @@
-import { HttpServer, MonitoredApps } from '../../src/server/index.js';
+import { HttpServer } from '../../src/server/index.js';
 import { logger } from '../../src/utils/index.js';
 
 /**********************************************************************************/
@@ -16,11 +16,9 @@ export const setup = async ({ provide }: Provide) => {
     healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${healthCheckRoute}`
   });
 
-  const monitoredApps = new MonitoredApps();
   const server = await HttpServer.create({
     mode: mode,
     dbData: { name: 'monitoring-app-pg-test', uri: dbUri },
-    monitoredApps: monitoredApps,
     routes: {
       api: `/${serverEnv.apiRoute}`,
       health: `/${healthCheckRoute}`

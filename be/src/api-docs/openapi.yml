@@ -147,12 +147,14 @@ components:
               lowerLimit:
                 type: number
                 description: >
-                  Milliseconds representing the lower limit for the threshold check
+                  Interval in milliseconds representing the lower limit for the
+                  threshold check
                 example: 20
               upperLimit:
                 type: number
                 description: >
-                  Milliseconds representing the upper limit for the threshold check
+                  Interval in milliseconds representing the upper limit for the
+                  threshold check
                 example: 50
     ServiceUpdateObj:
       type: object
@@ -179,12 +181,14 @@ components:
               lowerLimit:
                 type: number
                 description: >
-                  Milliseconds representing the lower limit for the threshold check
+                  Interval in milliseconds representing the lower limit for the
+                  threshold check
                 example: 20
               upperLimit:
                 type: number
                 description: >
-                  Milliseconds representing the upper limit for the threshold check
+                  Interval in milliseconds representing the upper limit for the
+                  threshold check
                 example: 50
     Service:
       type: object
@@ -216,18 +220,25 @@ components:
           items:
             type: object
             required:
+              - id
               - lowerLimit
               - upperLimit
             properties:
+              id:
+                type: string
+                format: uuid
+                example: 19070b12-2644-40c6-8860-ded80b76459c
               lowerLimit:
                 type: number
                 description: >
-                  Milliseconds representing the lower limit for the threshold check
+                  Interval in milliseconds representing the lower limit for the
+                  threshold check
                 example: 20
               upperLimit:
                 type: number
                 description: >
-                  Milliseconds representing the upper limit for the threshold check
+                  Interval in milliseconds representing the upper limit for the
+                  threshold check
                 example: 50
   requestBodies:
     ServiceCreationObj:

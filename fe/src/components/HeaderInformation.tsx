@@ -26,7 +26,7 @@ export default function HeaderInformation({
         <div className="header-information-value">{name}</div>
         <div className="header-information-value">{uri}</div>
         <div className="header-information-value">
-          {interval !== '' ? `${interval}ms` : null}
+          {interval.length ? `${interval}ms` : null}
         </div>
       </div>
     </div>

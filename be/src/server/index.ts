@@ -1,7 +1,6 @@
 import HttpServer from './http.js';
-import MonitoredApps from './monitoredApps.js';
-import WebSocketServer from './websocket.js';
+import WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
 
-export { HttpServer, MonitoredApps, WebSocketServer };
+export { HttpServer, WebsocketServer };

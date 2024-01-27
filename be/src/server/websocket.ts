@@ -8,7 +8,9 @@ import {
 } from '../types/index.js';
 import { ERR_CODES, STATUS, logger } from '../utils/index.js';
 
-import type MonitoredApps from './monitoredApps.js';
+/**********************************************************************************/
+
+type Service = { id: string; uri: string };
 
 /**********************************************************************************/
 
@@ -17,7 +19,7 @@ export default class {
   private readonly _monitorMap;
   private readonly _sendHttpRequest;
 
-  public constructor(server: Server, monitorMap: MonitoredApps) {
+  public constructor(server: Server, monitorMap: Map<string, ServiceData>) {
     // The server is bound to the http server instance, hence there's no need
     // for a close function, the server initiates closure when the http server does
     this._wss = new WebSocketServer({
@@ -40,34 +42,34 @@ export default class {
 
   private _scheduleMonitors() {
     for (const [serviceId, service] of this._monitorMap.entries()) {
-      this._monitorCheckCallback(serviceId, service.uri);
+      this._monitorCheckCallback({ id: serviceId, uri: service.uri });
     }
   }
 
-  private async _monitorCheck(serviceId: string, serviceUri: string) {
-    const broadcastMsg = await this._sendPingRequest(serviceUri);
+  private async _monitorCheck(service: Service) {
+    const broadcastMsg = await this._sendPingRequest(service);
     this._sendBroadcastMessage(broadcastMsg);
-    await this._rescheduleCheck(serviceId);
+    await this._rescheduleCheck(service.id);
   }
 
-  private async _sendPingRequest(serviceUri: string) {
+  private async _sendPingRequest(service: Service) {
     let startTime = performance.now();
-    let status = (await this._sendHttpRequest(serviceUri)).status;
-    let reqTime = performance.now() - startTime;
+    let status = (await this._sendHttpRequest(service.uri)).status;
+    let latency = performance.now() - startTime;
 
     if (status === STATUS.NOT_ALLOWED.CODE) {
       startTime = performance.now();
-      status = (await this._sendHttpRequest(serviceUri)).status;
-      reqTime = performance.now() - startTime;
+      status = (await this._sendHttpRequest(service.uri)).status;
+      latency = performance.now() - startTime;
     }
     if (status >= 200 && status < 300) {
-      return { serviceUri: serviceUri, reqTime: Number(reqTime.toFixed(2)) };
+      return { id: service.id, latency: Number(latency.toFixed(2)) };
     }
 
-    return { serviceUri: serviceUri, reqTime: -1 };
+    return { id: service.id, latency: -1 };
   }
 
-  private _sendBroadcastMessage(msg: { serviceUri: string; reqTime: number }) {
+  private _sendBroadcastMessage(msg: { id: string; latency: number }) {
     this._wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(msg));
@@ -81,7 +83,7 @@ export default class {
       return await Promise.resolve();
     }
     await setTimeoutAsync(service.interval);
-    this._monitorCheckCallback(serviceId, service.uri);
+    this._monitorCheckCallback({ id: serviceId, uri: service.uri });
   }
 
   private _attachEventHandlers() {
@@ -101,28 +103,39 @@ export default class {
     });
   }
 
-  private readonly _monitorCheckCallback = (
-    serviceId: string,
-    serviceUri: string
-  ) => {
+  private readonly _monitorCheckCallback = (service: {
+    id: string;
+    uri: string;
+  }) => {
     // Not awaiting on purpose, I don't want to await for the completion since
     // I don't mind minor timing errors. With that said I don't want a
     // rejection to not be caught and handles, hence this is the result
-    this._monitorCheck(serviceId, serviceUri).catch((e) => {
+    this._monitorCheck(service).catch((e) => {
       logger.error(e, 'Monitor check failed');
     });
   };
 
   /********************************************************************************/
 
-  public upsertMonitoredService(serviceId: string, service: ServiceData) {
-    this._monitorMap.upsert(serviceId, {
+  public insertMonitoredService(serviceId: string, service: ServiceData) {
+    // On insert we need to start the schedule monitor since it does not exist
+    this._monitorMap.set(serviceId, {
       name: service.name,
       uri: service.uri,
       interval: service.interval
     });
 
-    this._monitorCheckCallback(serviceId, service.uri);
+    this._monitorCheckCallback({ id: serviceId, uri: service.uri });
+  }
+
+  public updateMonitoredService(serviceId: string, service: ServiceData) {
+    // On update, there's no need to start the schedule monitor since it already
+    // exists
+    this._monitorMap.set(serviceId, {
+      name: service.name,
+      uri: service.uri,
+      interval: service.interval
+    });
   }
 
   public deleteMonitoredService(serviceId: string) {

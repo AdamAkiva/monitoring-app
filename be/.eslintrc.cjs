@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 /*
   These rules should **not** conflict with prettier, such as spaces and new lines
   rules. Please refrain from doing rules for it, or you will encounter issues.
@@ -11,7 +9,11 @@ module.exports = {
   env: { node: true },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
-  extends: ['plugin:security/recommended-legacy', 'plugin:drizzle/all', 'prettier'],
+  extends: [
+    'plugin:security/recommended-legacy',
+    'plugin:drizzle/all',
+    'prettier'
+  ],
   overrides: [
     {
       files: ['./src/**/*.ts', './__tests__/**/*.ts'],

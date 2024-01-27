@@ -6,7 +6,7 @@ import {
   logMiddleware,
   strcasecmp
 } from '../utils/index.js';
-import type MonitoredApps from './monitoredApps.js';
+import type WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
 
@@ -50,14 +50,11 @@ export const healthCheck = (
   };
 };
 
-export const attachContext = (
-  db: DatabaseHandler,
-  monitoredApps: MonitoredApps
-) => {
+export const attachContext = (db: DatabaseHandler, wss: WebsocketServer) => {
   return (req: Request, _: Response, next: NextFunction) => {
     req.monitoringApp = {
       db: db,
-      monitoredApps: monitoredApps,
+      wss: wss,
       logger: logMiddleware.logger
     };
 

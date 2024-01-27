@@ -26,7 +26,7 @@ import type { JsonObject } from 'swagger-ui-express';
 import { WebSocket, WebSocketServer } from 'ws';
 import { z as Zod } from 'zod';
 
-import type { Service } from './types.js';
+import type { Service } from './api.js';
 
 /**********************************************************************************/
 

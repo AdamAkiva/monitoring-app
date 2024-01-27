@@ -18,7 +18,7 @@ import type {
   Service,
   ServiceCreationObj,
   ServiceUpdateObj as UpdateService
-} from './config/types.js';
+} from './config/api.js';
 
 /**********************************************************************************/
 

@@ -1,4 +1,4 @@
-import HttpInstance, { httpInstance } from './http.ts';
+import HttpInstance from './http.ts';
 import {
   createService,
   deleteService,
@@ -15,6 +15,5 @@ export {
   createService,
   deleteService,
   fetchServices,
-  httpInstance,
   updateService
 };

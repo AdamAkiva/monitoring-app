@@ -1,11 +1,12 @@
 import {
   CiTrash,
   MdEdit,
+  useCallback,
   useState,
   type Service,
-  type ServiceCreation,
-  type ServiceUpdates
+  type UpsertService
 } from '@/types';
+import { SUPPORTED_COLORS } from '@/utils';
 
 import SubmitForm from './SubmitForm.tsx';
 
@@ -13,13 +14,11 @@ import './Card.css';
 
 /**********************************************************************************/
 
-const colors = ['#33cc33', '#ff9900', '#ff3300'];
-
 type CardProps = {
   service: Service;
   latency: number;
   onCardClick: (serviceId: string) => void;
-  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+  onSubmitForm: (serviceUpdates: UpsertService, serviceId?: string) => void;
   onDeleteClick: (serviceId: string) => void;
 };
 
@@ -34,19 +33,20 @@ export default function Card({
 }: CardProps) {
   const [showForm, setShowForm] = useState(false);
 
-  const openForm = () => {
+  const openForm = useCallback(() => {
     setShowForm(true);
-  };
-  const closeForm = () => {
+  }, []);
+  const closeForm = useCallback(() => {
     setShowForm(false);
-  };
+  }, []);
 
-  const handleCardClick = () => {
-    onCardClick(service.id);
-  };
-  const handleDeleteClick = () => {
+  const handleDeleteClick = useCallback(() => {
     onDeleteClick(service.id);
-  };
+  }, [onDeleteClick, service.id]);
+
+  const handleCardClick = useCallback(() => {
+    onCardClick(service.id);
+  }, [onCardClick, service.id]);
 
   let circleColor = '#000000';
   for (let i = 0; i < service.thresholds.length && i < 3; ++i) {
@@ -54,31 +54,34 @@ export default function Card({
       latency >= service.thresholds[i].lowerLimit &&
       latency <= service.thresholds[i].upperLimit
     ) {
-      circleColor = colors[i];
+      circleColor = SUPPORTED_COLORS[i];
       break;
     }
-    circleColor = colors[2];
+    circleColor = SUPPORTED_COLORS[2];
   }
-
-  const styles = {
-    backgroundColor: circleColor
-  };
 
   return (
     <div className="card">
-      {showForm && (
+      {showForm ? (
         <SubmitForm
           onSubmitForm={onSubmitForm}
           closeForm={closeForm}
           state={service}
         />
-      )}
+      ) : null}
       <div className="card-header">
         <div className="card-header-modification">
-          <button onClick={openForm}>
+          <button type="button" onClick={openForm}>
             <MdEdit />
           </button>
-          <button onClick={handleDeleteClick}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              handleDeleteClick();
+            }}
+          >
             <CiTrash />
           </button>
         </div>
@@ -89,11 +92,11 @@ export default function Card({
       <div className="card-body" onClick={handleCardClick}>
         <p>
           <b>Latency: </b>
-          {latency !== -1 ? `${latency}ms` : null}
+          {latency >= 0 ? `${latency}ms` : ''}
         </p>
       </div>
       <div className="card-footer" onClick={handleCardClick}>
-        <div className="card-circle" style={styles}></div>
+        <div className="card-circle" style={{ backgroundColor: circleColor }} />
       </div>
     </div>
   );

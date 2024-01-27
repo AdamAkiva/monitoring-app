@@ -2,9 +2,9 @@ import {
   AiOutlinePlus,
   useCallback,
   useState,
-  type ServiceCreation,
-  type ServiceUpdates
+  type UpsertService
 } from '@/types';
+
 import SubmitForm from './SubmitForm.tsx';
 
 import './AddCard.css';
@@ -12,7 +12,7 @@ import './AddCard.css';
 /**********************************************************************************/
 
 type AddCardProps = {
-  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+  onSubmitForm: (serviceUpdates: UpsertService, serviceId?: string) => void;
 };
 
 /**********************************************************************************/
@@ -29,16 +29,16 @@ export default function AddCard({ onSubmitForm }: AddCardProps) {
 
   return (
     <div className="add-card">
-      <button className="add-card" onClick={openForm}>
+      <button type="button" className="add-card" onClick={openForm}>
         <AiOutlinePlus />
       </button>
-      {showForm && (
+      {showForm ? (
         <SubmitForm
           onSubmitForm={onSubmitForm}
           closeForm={closeForm}
-          state={undefined}
+          state={null}
         />
-      )}
+      ) : null}
     </div>
   );
 }

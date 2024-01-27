@@ -80,6 +80,11 @@ export interface Service {
   /** @minItems 1 */
   thresholds: {
     /**
+     * @format uuid
+     * @example "19070b12-2644-40c6-8860-ded80b76459c"
+     */
+    id: string;
+    /**
      * Milliseconds representing the lower limit for the threshold check
      * @example 20
      */

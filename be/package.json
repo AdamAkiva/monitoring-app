@@ -12,7 +12,7 @@
     "test": "NODE_ENV=test npx vitest run --config ./__tests__/config/vite.config.ts",
     "lint": "npx tsc --project ./tsconfig.json --noEmit && npx eslint \"{src,__tests__}/**/*.ts\"",
     "generate-migrations": "npx drizzle-kit generate:pg --config=./db-migrations/drizzle.config.ts",
-    "generate-types": "npx swagger-typescript-api --modular --clean-output --no-client -o ../codegen/ -p src/api-docs/openapi.yml && mv ../codegen/data-contracts.ts ../codegen/types.ts && cp ../codegen/types.ts ./__tests__/config/types.ts && cp ../codegen/types.ts ./src/types/types.ts && cp ../codegen/types.ts ../fe/src/types/types.ts",
+    "generate-types": "npx swagger-typescript-api --modular --clean-output --no-client -o ../codegen/ -p src/api-docs/openapi.yml && mv ../codegen/data-contracts.ts ../codegen/api.ts && cp ../codegen/api.ts ./__tests__/config/api.ts && cp ../codegen/api.ts ./src/types/api.ts && cp ../codegen/api.ts ../fe/src/types/api.ts",
     "build": "npx eslint './src/**/*.ts' && npx tsc --build --verbose ./tsconfig.prod.json",
     "check-global-updates": "npx ncu -g",
     "check-local-updates": "npx ncu",

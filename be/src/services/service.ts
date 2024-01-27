@@ -48,21 +48,28 @@ export const createOne = async (
         })
         .returning({ id: serviceModel.id })
     )[0].id;
-    await handler.insert(thresholdModel).values(
-      service.thresholds.map((entry) => {
-        return {
-          ...entry,
-          serviceId: serviceId
-        };
-      })
-    );
+    const thresholds = await handler
+      .insert(thresholdModel)
+      .values(
+        service.thresholds.map((entry) => {
+          return {
+            ...entry,
+            serviceId: serviceId
+          };
+        })
+      )
+      .returning({
+        id: thresholdModel.id,
+        lowerLimit: thresholdModel.lowerLimit,
+        upperLimit: thresholdModel.upperLimit
+      });
 
     return {
       id: serviceId,
       name: service.name,
       uri: service.uri,
       monitorInterval: service.monitorInterval,
-      thresholds: service.thresholds
+      thresholds: thresholds
     };
   } catch (err) {
     throw sanitizeError(err, { type: 'Service', name: service.name });
@@ -159,10 +166,11 @@ const readServices = async (db: DatabaseHandler, filter?: SQL) => {
   const { serviceModel, thresholdModel } = db.getModels();
 
   const fields = {
-    id: serviceModel.id,
+    serviceId: serviceModel.id,
     name: serviceModel.name,
     uri: serviceModel.uri,
     monitorInterval: serviceModel.monitorInterval,
+    thresholdId: thresholdModel.id,
     lowerLimit: thresholdModel.lowerLimit,
     upperLimit: thresholdModel.upperLimit
   };
@@ -184,11 +192,11 @@ const readServices = async (db: DatabaseHandler, filter?: SQL) => {
 
 const sanitizeServices = (serviceEntires: DatabaseServices) => {
   const servicesMap = new Map<string, Service>(
-    serviceEntires.map(({ id, name, uri, monitorInterval }) => {
+    serviceEntires.map(({ serviceId, name, uri, monitorInterval }) => {
       return [
-        id,
+        serviceId,
         {
-          id: id,
+          id: serviceId,
           name: name,
           uri: uri,
           monitorInterval: monitorInterval,
@@ -197,14 +205,17 @@ const sanitizeServices = (serviceEntires: DatabaseServices) => {
       ];
     })
   );
-  serviceEntires.forEach(({ id, lowerLimit, upperLimit }) => {
-    // It was assigned in the code section above, it has to be defined here
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    servicesMap.get(id)!.thresholds.push({
-      lowerLimit: lowerLimit,
-      upperLimit: upperLimit
-    });
-  });
+  serviceEntires.forEach(
+    ({ serviceId, thresholdId, lowerLimit, upperLimit }) => {
+      // It was assigned in the code snippet above, it must be defined here
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      servicesMap.get(serviceId)!.thresholds.push({
+        id: thresholdId,
+        lowerLimit: lowerLimit,
+        upperLimit: upperLimit
+      });
+    }
+  );
 
   return Array.from(servicesMap.values());
 };
@@ -281,15 +292,18 @@ const updateServiceThresholds = async (params: {
 
 const sanitizeService = (serviceEntries: DatabaseServices) => {
   return {
-    id: serviceEntries[0].id,
+    id: serviceEntries[0].serviceId,
     name: serviceEntries[0].name,
     uri: serviceEntries[0].uri,
     monitorInterval: serviceEntries[0].monitorInterval,
-    thresholds: serviceEntries.map(({ lowerLimit, upperLimit }) => {
-      return {
-        lowerLimit: lowerLimit,
-        upperLimit: upperLimit
-      };
-    })
+    thresholds: serviceEntries.map(
+      ({ thresholdId, lowerLimit, upperLimit }) => {
+        return {
+          id: thresholdId,
+          lowerLimit: lowerLimit,
+          upperLimit: upperLimit
+        };
+      }
+    )
   };
 };

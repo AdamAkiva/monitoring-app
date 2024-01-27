@@ -1,6 +1,5 @@
 import { ky, type KyOptions, type RequiredFields } from '@/types';
-
-import { getEnvValue } from '../env.ts';
+import { getEnvValue } from '@/utils';
 
 /**********************************************************************************/
 
@@ -8,7 +7,7 @@ export default class HttpInstance {
   private readonly _handler;
   private readonly _url;
 
-  public constructor(url: string) {
+  public constructor(url: string = getEnvValue('HTTP_SERVER_URL')) {
     this._handler = ky.create({
       timeout: 8_000,
       throwHttpErrors: true,
@@ -48,5 +47,3 @@ export default class HttpInstance {
     throw new Error('Unsupported content type');
   }
 }
-
-export const httpInstance = new HttpInstance(getEnvValue('HTTP_SERVER_URL'));

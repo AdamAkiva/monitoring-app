@@ -11,26 +11,18 @@ import ReactDOM from 'react-dom/client';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { CiTrash } from 'react-icons/ci';
 import { MdEdit } from 'react-icons/md';
+import { v4 as randomUUID } from 'uuid';
+
+import type { Service, ServiceCreationObj as UpsertService } from './api.ts';
 
 /**********************************************************************************/
+
+export type Mode = 'development' | 'production' | 'test';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
 export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
 
-export type Service = {
-  id: string;
-  name: string;
-  uri: string;
-  monitorInterval: number;
-  thresholds: {
-    lowerLimit: number;
-    upperLimit: number;
-  }[];
-};
-export type ServiceCreation = Omit<Service, 'id'>;
-export type ServiceUpdates = Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>;
-
-export type ClickEvent = React.MouseEvent<HTMLElement>;
+export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
 /**********************************************************************************/
 
@@ -41,11 +33,14 @@ export {
   React,
   ReactDOM,
   ky,
+  randomUUID,
   useCallback,
   useEffect,
   useRef,
   useState,
   type Dispatch,
   type KyOptions,
-  type SetStateAction
+  type Service,
+  type SetStateAction,
+  type UpsertService
 };
