@@ -44,8 +44,8 @@ export const createOne = (req: Request) => {
   const res = Zod.object(
     {
       name: Zod.string({
-        invalid_type_error: invalidStringErr('uri'),
-        required_error: requiredErr('uri')
+        invalid_type_error: invalidStringErr('name'),
+        required_error: requiredErr('name')
       })
         .min(NAME_MIN_LEN, minErr('name', NAME_MIN_LEN))
         .max(NAME_MAX_LEN, maxErr('name', NAME_MAX_LEN))

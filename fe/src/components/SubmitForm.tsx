@@ -1,17 +1,28 @@
 import {
   AddIcon,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
-  useCallback,
+  Stack,
+  TextField,
+  randomUUID,
   useEffect,
   useRef,
   useState,
+  type FormEvent,
   type Service,
   type UpsertService
 } from '@/types';
-import { DEFAULT_SERVICE_DATA_WITHOUT_ID } from '@/utils';
+import { ServiceValidator } from '@/validation';
 
 /**********************************************************************************/
+
+// TODO
+// Focus does not work by default in strict mode since every hook is called twice
 
 type SubmitFormProps = {
   onSubmitForm: (service: UpsertService, serviceId?: string) => void;
@@ -26,195 +37,338 @@ export default function SubmitForm({
   closeForm,
   state
 }: SubmitFormProps) {
-  const [formData, setFormData] = useState(
-    state ?? DEFAULT_SERVICE_DATA_WITHOUT_ID
+  // Used to monitor the current element which needs to be focused.
+  // Used to focus on a newly added threshold row
+  const focusRef = useRef<HTMLInputElement | null>(null);
+
+  // The reason for keeping all of these states is to allow for validation checks.
+  // TODO
+  // I have my concerns about the performance of so many state but I'll get
+  // to it at a later date
+
+  // Keep the state of the service name
+  const [serviceName, setServiceName] = useState({
+    text: state?.name ?? '',
+    errorText: ''
+  });
+  // Keep the state of the service uri
+  const [serviceUri, setServiceUri] = useState({
+    text: state?.uri ?? '',
+    errorText: ''
+  });
+  // Keep the state of the service monitor interval
+  const [serviceMonitorInterval, setServiceMonitorInterval] = useState({
+    text:
+      state && state.monitorInterval >= 0
+        ? state.monitorInterval.toString()
+        : '',
+    errorText: ''
+  });
+  // Keep the state of the service threshold row(s)
+  const [thresholds, setThresholds] = useState(
+    state?.thresholds.map(({ id, lowerLimit, upperLimit }) => {
+      return {
+        id: id,
+        lowerLimitText: lowerLimit.toString(),
+        lowerLimitErrorText: '',
+        upperLimitText: upperLimit.toString(),
+        upperLimitErrorText: ''
+      };
+    }) ?? [
+      // The default is one in size, in order to have an empty row when creating
+      // a new service
+      {
+        id: randomUUID(),
+        lowerLimitText: '',
+        lowerLimitErrorText: '',
+        upperLimitText: '',
+        upperLimitErrorText: ''
+      }
+    ]
   );
-  const thresholdRowRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    thresholdRowRef.current?.focus();
-  }, [formData.thresholds.length]);
-
-  const handleInputChange = useCallback(
-    (field: 'monitorInterval' | 'name' | 'uri', value: string) => {
-      setFormData((prevFormData) => {
-        return { ...prevFormData, [field]: value };
-      });
+  // Used to focus a newly added thresholds row
+  useEffect(
+    () => {
+      focusRef.current?.focus();
     },
-    []
+    // Run this hook whenever the threshold rows size changes
+    [thresholds.length]
   );
 
-  const handleThresholdChange = useCallback(
-    (params: {
-      id: string;
-      type: 'lowerLimit' | 'upperLimit';
-      value: string;
-    }) => {
-      const { id, type, value } = params;
+  const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
+    // Disable the default behavior of a form, to send a form.
+    // I want it to propagate up the chain instead
+    e.preventDefault();
 
-      const updatedThresholdRows = formData.thresholds.map((thresholdRow) => {
-        if (thresholdRow.id === id) {
-          return {
-            ...thresholdRow,
-            [type]: value
-          };
-        }
-
-        return thresholdRow;
-      });
-
-      setFormData((prevFormData) => {
+    // Basically the idea is to validate every field and change its status to
+    // error is it needs to be. In addition we don't remove the previous value
+    // because that does not make any sense (hence the ...prevData everywhere)
+    let valid = true;
+    const serviceNameError = ServiceValidator.nameValidator(serviceName.text);
+    if (serviceNameError) {
+      setServiceName((prevData) => {
         return {
-          ...prevFormData,
-          thresholds: updatedThresholdRows
+          ...prevData,
+          errorText: serviceNameError
         };
       });
-    },
-    [formData.thresholds]
-  );
+      valid = false;
+    }
+    const serviceUriError = ServiceValidator.uriValidator(serviceUri.text);
+    if (serviceUriError) {
+      setServiceUri((prevData) => {
+        return {
+          ...prevData,
+          errorText: serviceUriError
+        };
+      });
+      valid = false;
+    }
+    const serviceMonitorIntervalError =
+      ServiceValidator.monitorIntervalValidator(serviceMonitorInterval.text);
+    if (serviceMonitorIntervalError) {
+      setServiceMonitorInterval((prevData) => {
+        return {
+          ...prevData,
+          errorText: serviceMonitorIntervalError
+        };
+      });
+      valid = false;
+    }
+    for (const threshold of thresholds) {
+      const thresholdErrs = ServiceValidator.thresholdValidator(
+        threshold.lowerLimitText,
+        threshold.upperLimitText
+      );
+      if (thresholdErrs.lowerThreshold || thresholdErrs.upperThreshold) {
+        setThresholds((prevData) => {
+          return prevData.map((data) => {
+            if (data.id === threshold.id) {
+              return {
+                ...data,
+                lowerLimitErrorText: thresholdErrs.lowerThreshold,
+                upperLimitErrorText: thresholdErrs.upperThreshold
+              };
+            }
 
-  const rows = formData.thresholds.map(({ id, lowerLimit, upperLimit }) => {
+            return data;
+          });
+        });
+        valid = false;
+      }
+    }
+
+    if (!valid) {
+      return;
+    }
+
+    // It is guaranteed to be in order
+    const formData = new FormData(e.currentTarget);
+    const lowerLimits = formData.getAll('lowerLimit');
+    const upperLimits = formData.getAll('upperLimit');
+
+    onSubmitForm({
+      name: formData.get('name') as string,
+      uri: formData.get('uri') as string,
+      monitorInterval: Number(formData.get('monitorInterval')),
+      thresholds: lowerLimits.map((lowerLimit, i) => {
+        return {
+          lowerLimit: Number(lowerLimit),
+          upperLimit: Number(upperLimits[i])
+        };
+      })
+    });
+
+    closeForm();
+  };
+
+  const rows = thresholds.map((threshold) => {
     return (
-      <div key={id} className="form-row">
-        <input
-          placeholder="Lower limit"
-          type="number"
-          min={0}
-          max={Number.MAX_SAFE_INTEGER}
-          value={lowerLimit >= 0 ? lowerLimit : ''}
+      <Stack
+        key={threshold.id}
+        direction={'row'}
+        spacing={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 4 }}
+        sx={{ mt: 2.5 }}
+      >
+        <TextField
           required={true}
-          // Used to set focus on a newly added row
-          ref={
-            id === String(formData.thresholds.length) ? thresholdRowRef : null
+          // Used to set focus on a newly added threshold row
+          inputRef={
+            threshold.id === String(thresholds.length) ? focusRef : null
           }
+          margin={'normal'}
+          id={'lowerLimit'}
+          name={'lowerLimit'}
+          label={'Lower Limit'}
+          type={'number'}
+          fullWidth={true}
+          variant={'filled'}
+          placeholder={'0'}
+          value={threshold.lowerLimitText}
+          error={!!threshold.lowerLimitErrorText}
+          helperText={threshold.lowerLimitErrorText}
           onChange={(e) => {
-            return handleThresholdChange({
-              id: id,
-              type: 'lowerLimit',
-              value: e.target.value
+            // Used to update the state and reset the error value (if exists)
+            setThresholds((prevData) => {
+              return prevData.map((data) => {
+                if (data.id === threshold.id) {
+                  return {
+                    ...data,
+                    lowerLimitText: e.target.value,
+                    lowerLimitErrorText: ''
+                  };
+                }
+
+                return data;
+              });
             });
           }}
         />
-        <input
-          placeholder="Upper limit"
-          type="number"
-          min={0}
-          max={Number.MAX_SAFE_INTEGER}
-          value={upperLimit >= 0 ? upperLimit : ''}
+        <TextField
           required={true}
+          margin={'normal'}
+          id={'upperLimit'}
+          name={'upperLimit'}
+          label={'Upper Limit'}
+          type={'number'}
+          fullWidth={true}
+          variant={'filled'}
+          placeholder={'99'}
+          value={threshold.upperLimitText}
+          error={!!threshold.upperLimitErrorText}
+          helperText={threshold.upperLimitErrorText}
           onChange={(e) => {
-            return handleThresholdChange({
-              id: id,
-              type: 'upperLimit',
-              value: e.target.value
+            // Used to update the state and reset the error value (if exists)
+            setThresholds((prevData) => {
+              return prevData.map((data) => {
+                if (data.id === threshold.id) {
+                  return {
+                    ...data,
+                    upperLimitText: e.target.value,
+                    upperLimitErrorText: ''
+                  };
+                }
+
+                return data;
+              });
             });
           }}
         />
         <IconButton
-          aria-label="Add new threshold row"
           type="button"
+          sx={{ borderRadius: 0 }}
           onClick={() => {
-            setFormData((prevData) => {
-              return {
+            // Create a new threshold row on a button click
+            setThresholds((prevData) => {
+              return [
                 ...prevData,
-                thresholds: [
-                  ...prevData.thresholds,
-                  {
-                    id: String(prevData.thresholds.length + 1),
-                    lowerLimit: -1,
-                    upperLimit: -1
-                  }
-                ]
-              };
+                {
+                  id: String(prevData.length + 1),
+                  lowerLimitText: '',
+                  lowerLimitErrorText: '',
+                  upperLimitText: '',
+                  upperLimitErrorText: ''
+                }
+              ];
             });
           }}
         >
           <AddIcon />
         </IconButton>
-      </div>
+      </Stack>
     );
   });
 
   return (
-    <div className="form-window">
-      <form
-        onSubmit={(e) => {
-          // To prevent a page refresh
-          e.preventDefault();
-
-          // Close the form manually since we disabled the page refresh
-          closeForm();
-
-          // Making sure the numbers are actual number types and not strings
-          const upsertData: UpsertService = {
-            name: formData.name,
-            uri: formData.uri,
-            monitorInterval: Number(formData.monitorInterval),
-            thresholds: formData.thresholds.map(
-              ({ lowerLimit, upperLimit }) => {
-                return {
-                  lowerLimit: Number(lowerLimit),
-                  upperLimit: Number(upperLimit)
-                };
-              }
-            )
-          };
-
-          return onSubmitForm(upsertData, state?.id);
-        }}
-      >
-        <div className="form-row">
-          <label>Name:</label>
-          <input
-            type="text"
-            placeholder="Google"
-            autoFocus={true}
-            minLength={1}
-            maxLength={2048}
-            value={formData.name}
-            required={true}
-            onChange={(e) => {
-              return handleInputChange('name', e.target.value);
-            }}
-          />
-        </div>
-        <div className="form-row">
-          <label>URI:</label>
-          <input
-            type="string"
-            placeholder="https://google.com"
-            minLength={1}
-            maxLength={2048}
-            value={formData.uri}
-            required={true}
-            onChange={(e) => {
-              return handleInputChange('uri', e.target.value);
-            }}
-          />
-        </div>
-        <div className="form-row">
-          <label>Monitor interval:</label>
-          <input
-            type="number"
-            placeholder="30"
-            min={50}
-            max={Number.MAX_SAFE_INTEGER}
-            value={
-              formData.monitorInterval >= 0 ? formData.monitorInterval : ''
-            }
-            required={true}
-            onChange={(e) => {
-              return handleInputChange('monitorInterval', e.target.value);
-            }}
-          />
-        </div>
-        <div className="form-thresholds">Thresholds:</div>
+    <Dialog
+      open={true}
+      onClose={closeForm}
+      // Use MUI Paper as the container as a form component
+      PaperProps={{
+        component: 'form',
+        onSubmit: onSubmitHandler
+      }}
+    >
+      <DialogTitle align={'center'} fontWeight={500} fontSize={24}>
+        Add Service
+      </DialogTitle>
+      <DialogContent dividers={true}>
+        <DialogContentText align={'center'} fontWeight={400} fontSize={18}>
+          To add a new service please fill out this form:
+        </DialogContentText>
+        <TextField
+          autoFocus={true}
+          required={true}
+          margin={'normal'}
+          id={'name'}
+          name={'name'}
+          label={'Service Name'}
+          type={'text'}
+          fullWidth={true}
+          variant={'filled'}
+          placeholder={'Google'}
+          value={serviceName.text}
+          error={!!serviceName.errorText}
+          helperText={serviceName.errorText}
+          onChange={(e) => {
+            // Used to update the state and reset the error value (if exists)
+            setServiceName({
+              text: e.target.value,
+              errorText: ''
+            });
+          }}
+        />
+        <TextField
+          required={true}
+          margin={'normal'}
+          id={'uri'}
+          name={'uri'}
+          label={'URI'}
+          type={'text'}
+          fullWidth={true}
+          variant={'filled'}
+          placeholder={'https://google.com'}
+          value={serviceUri.text}
+          error={!!serviceUri.errorText}
+          helperText={serviceUri.errorText}
+          onChange={(e) => {
+            // Used to update the state and reset the error value (if exists)
+            setServiceUri({
+              text: e.target.value,
+              errorText: ''
+            });
+          }}
+        />
+        <TextField
+          required={true}
+          margin={'normal'}
+          id={'monitorInterval'}
+          name={'monitorInterval'}
+          label={'Monitor Interval'}
+          type={'number'}
+          fullWidth={true}
+          variant={'filled'}
+          placeholder={'2000'}
+          value={serviceMonitorInterval.text}
+          error={!!serviceMonitorInterval.errorText}
+          helperText={serviceMonitorInterval.errorText}
+          onChange={(e) => {
+            // Used to update the state and reset the error value (if exists)
+            setServiceMonitorInterval({
+              text: e.target.value,
+              errorText: ''
+            });
+          }}
+        />
         {rows}
-        <Button type="submit">Submit</Button>
+      </DialogContent>
+      <DialogActions sx={{ justifyContent: 'left' }}>
         <Button type="button" onClick={closeForm}>
-          Close
+          Cancel
         </Button>
-      </form>
-    </div>
+        <Button type="submit">Add</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

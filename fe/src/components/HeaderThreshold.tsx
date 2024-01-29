@@ -14,31 +14,23 @@ export default function HeaderThreshold({ thresholds }: HeaderThresholdProps) {
         direction={'row'}
         spacing={{ xs: 2, sm: 2, md: 4, lg: 4, xl: 8 }}
         sx={{
-          width: '100%',
-          maxWidth: 400,
-          justifyContent: 'center',
-          alignItems: 'center'
+          justifyContent: 'left',
+          width: '100%'
         }}
       >
-        <Stack
-          direction={'row'}
-          sx={{ justifyContent: 'inherit', alignItems: 'inherit' }}
-        >
+        <Stack direction={'row'}>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
-            Lower threshold:
+            {upperLimit >= 0 ? 'Lower threshold:' : null}
           </Typography>
-          <Typography variant="body1" sx={{ ml: 1 }}>
+          <Typography variant="body1" sx={{ ml: 0.66 }}>
             {lowerLimit >= 0 ? `${lowerLimit}ms` : null}
           </Typography>
         </Stack>
-        <Stack
-          direction={'row'}
-          sx={{ justifyContent: 'inherit', alignItems: 'inherit' }}
-        >
+        <Stack direction={'row'}>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
-            Upper threshold:
+            {upperLimit >= 0 ? 'Upper threshold:' : null}
           </Typography>
-          <Typography variant="body1" sx={{ ml: 1 }}>
+          <Typography variant="body1" sx={{ ml: 0.66 }}>
             {upperLimit >= 0 ? `${upperLimit}ms` : null}
           </Typography>
         </Stack>
@@ -50,7 +42,11 @@ export default function HeaderThreshold({ thresholds }: HeaderThresholdProps) {
     <Stack
       direction={'column'}
       spacing={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 4 }}
-      sx={{ justifyContent: 'center', alignItems: 'center' }}
+      sx={{
+        justifyContent: 'left',
+        width: '60%',
+        m: 2
+      }}
     >
       {thresholdElements}
     </Stack>

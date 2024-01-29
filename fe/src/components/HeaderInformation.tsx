@@ -19,24 +19,24 @@ export default function HeaderInformation({
     <Stack
       direction={'row'}
       sx={{
-        width: '100%',
-        maxWidth: 400,
-        justifyContent: 'center',
-        alignItems: 'center'
+        width: '40%',
+        justifyContent: 'space-evenly',
+        alignItems: 'space-evenly',
+        p: 2
       }}
     >
       <Stack
         direction={'column'}
         spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
-        sx={{ justifyContent: 'left', alignItems: 'left', mr: 1.5 }}
+        sx={{ justifyContent: 'left', alignItems: 'left' }}
       >
-        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
           Name:
         </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
           URI:
         </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
           Interval:
         </Typography>
       </Stack>
@@ -45,9 +45,13 @@ export default function HeaderInformation({
         spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
         sx={{ justifyContent: 'left', alignItems: 'left' }}
       >
-        <Typography variant="body1">{name}</Typography>
-        <Typography variant="body1">{uri}</Typography>
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{ fontSize: 18 }}>
+          {name}
+        </Typography>
+        <Typography variant="body1" sx={{ fontSize: 18 }}>
+          {uri}
+        </Typography>
+        <Typography variant="body1" sx={{ fontSize: 18 }}>
           {interval.length ? `${interval}ms` : null}
         </Typography>
       </Stack>

@@ -7,9 +7,11 @@ import {
   updateService
 } from '@/api';
 import {
+  AddIcon,
   Box,
   Container,
   Grid,
+  IconButton,
   Stack,
   useCallback,
   useEffect,
@@ -20,12 +22,12 @@ import {
 } from '@/types';
 import { DEFAULT_SERVICE_DATA_WITH_ID } from '@/utils';
 
-import AddCard from './AddCard.tsx';
 import Card from './Card.tsx';
 import HeaderInformation from './HeaderInformation.tsx';
 import HeaderThreshold from './HeaderThreshold.tsx';
 
 import './MonitoringApplication.css';
+import SubmitForm from './SubmitForm.tsx';
 
 /**********************************************************************************/
 
@@ -34,19 +36,22 @@ export default function MonitoringApplication() {
   const ws = useRef<WebsocketInstance | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState(
     DEFAULT_SERVICE_DATA_WITH_ID
   );
   const [latencyMap, setLatencyMap] = useState(new Map<string, number>());
 
-  // Passing an empty array in order for this hook to be called once
+  // Passing an empty array in order for this hook to be called once, only
+  // on the initial mount
   useEffect(() => {
     ws.current = new WebsocketInstance({ setLatencyMap: setLatencyMap });
 
     return ws.current.disconnect();
   }, []);
-  // Passing an empty array in order for this hook to be called once
+  // Passing an empty array in order for this hook to be called once, only
+  // on the initial mount
   useEffect(() => {
     void fetchServices({
       httpInstance: httpInstance.current,
@@ -101,6 +106,13 @@ export default function MonitoringApplication() {
     });
   }, []);
 
+  const openForm = useCallback(() => {
+    setShowForm(true);
+  }, []);
+  const closeForm = useCallback(() => {
+    setShowForm(false);
+  }, []);
+
   const bodyCards = services.map((service) => {
     const serviceLatency = latencyMap.get(service.id) ?? -1;
 
@@ -116,10 +128,25 @@ export default function MonitoringApplication() {
       </Grid>
     );
   });
-  // There will always be a single AddCard, so its id can be static
+  // There will always be a single AddCard, so the key can be static
   bodyCards.push(
     <Grid key={-1} xs={12} sm={8} md={4} lg={4} xl={2}>
-      <AddCard onSubmitForm={handleServiceCreation} />
+      <IconButton
+        type="button"
+        aria-label="Add new service"
+        onClick={() => {
+          openForm();
+        }}
+      >
+        <AddIcon />
+      </IconButton>
+      {showForm ? (
+        <SubmitForm
+          onSubmitForm={handleServiceCreation}
+          closeForm={closeForm}
+          state={null}
+        />
+      ) : null}
     </Grid>
   );
 
@@ -141,13 +168,15 @@ export default function MonitoringApplication() {
   };
 
   return (
-    <Container>
+    <Container maxWidth={'xl'}>
       <Stack
         direction={'row'}
-        spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 16 }}
+        spacing={{ xs: 2, sm: 2, md: 4, lg: 8, xl: 16 }}
         sx={{
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          pt: 2,
+          pb: 4
         }}
       >
         {headerData.headerInformation}
