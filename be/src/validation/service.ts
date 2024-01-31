@@ -1,6 +1,7 @@
-import { Zod, type Request } from '../types/index.js';
+import { Zod, type Request, type ValidatedType } from '../types/index.js';
 import { VALIDATION } from '../utils/index.js';
 import {
+  checkAndParseErrors,
   emptyErr,
   invalidArrayErr,
   invalidNumberErr,
@@ -10,7 +11,6 @@ import {
   invalidUuid,
   maxErr,
   minErr,
-  parseErrors,
   requiredErr,
   validateEmptyObject
 } from './utils.js';
@@ -33,15 +33,18 @@ const {
 export const readMany = (req: Request) => {
   const { body, params, query } = req;
 
-  validateEmptyObject('service', { ...body, ...params, ...query });
+  const err = checkAndParseErrors(
+    validateEmptyObject('service', { ...body, ...params, ...query })
+  );
+  if (err) {
+    throw err;
+  }
 };
 
 export const createOne = (req: Request) => {
   const { body, params, query } = req;
 
-  validateEmptyObject('service', { ...params, ...query });
-
-  const res = Zod.object(
+  const bodySchema = Zod.object(
     {
       name: Zod.string({
         invalid_type_error: invalidStringErr('name'),
@@ -129,20 +132,22 @@ export const createOne = (req: Request) => {
         ...fields,
         name: name ?? fields.uri
       };
-    })
-    .safeParse(body);
+    });
 
-  if (!res.success) {
-    throw parseErrors(res.error);
+  const bodyRes = bodySchema.safeParse(body);
+  const err = checkAndParseErrors(
+    bodyRes,
+    validateEmptyObject('service', { ...params, ...query })
+  );
+  if (err) {
+    throw err;
   }
 
-  return res.data;
+  return (bodyRes as ValidatedType<typeof bodySchema>).data;
 };
 
 export const updateOne = (req: Request) => {
   const { body, params, query } = req;
-
-  validateEmptyObject('service', query);
 
   const paramsSchema = Zod.object(
     {
@@ -262,21 +267,18 @@ export const updateOne = (req: Request) => {
 
   const paramsRes = paramsSchema.safeParse(params);
   const bodyRes = bodySchema.safeParse(body);
-
-  const errs: Zod.ZodError[] = [];
-  if (!paramsRes.success) {
-    errs.push(paramsRes.error);
-  }
-  if (!bodyRes.success) {
-    errs.push(bodyRes.error);
-  }
-  if (errs.length) {
-    throw parseErrors(...errs);
+  const err = checkAndParseErrors(
+    paramsRes,
+    bodyRes,
+    validateEmptyObject('service', query)
+  );
+  if (err) {
+    throw err;
   }
 
   return {
-    ...(paramsRes as Zod.SafeParseSuccess<Zod.infer<typeof paramsSchema>>).data,
-    ...(bodyRes as Zod.SafeParseSuccess<Zod.infer<typeof bodySchema>>).data
+    ...(paramsRes as ValidatedType<typeof paramsSchema>).data,
+    ...(bodyRes as ValidatedType<typeof bodySchema>).data
   };
 };
 
@@ -285,7 +287,7 @@ export const deleteOne = (req: Request) => {
 
   validateEmptyObject('service', { ...body, ...query });
 
-  const res = Zod.object(
+  const paramsSchema = Zod.object(
     {
       serviceId: Zod.string({
         invalid_type_error: invalidStringErr('service id'),
@@ -296,13 +298,16 @@ export const deleteOne = (req: Request) => {
       invalid_type_error: invalidObjectErr('service'),
       required_error: requiredErr('service')
     }
-  )
-    .strict(invalidStructure('service'))
-    .safeParse(params);
+  ).strict(invalidStructure('service'));
 
-  if (!res.success) {
-    throw parseErrors(res.error);
+  const paramsRes = paramsSchema.safeParse(params);
+  const err = checkAndParseErrors(
+    paramsRes,
+    validateEmptyObject('chapter', { ...body, ...query })
+  );
+  if (err) {
+    throw err;
   }
 
-  return res.data.serviceId;
+  return (paramsRes as ValidatedType<typeof paramsSchema>).data.serviceId;
 };

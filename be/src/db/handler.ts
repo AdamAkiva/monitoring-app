@@ -1,5 +1,5 @@
 // The default import is on purpose. See: https://orm.drizzle.team/docs/sql-schema-declaration
-import { drizzle, pg, type Mode } from '../types/index.js';
+import { drizzle, pg, type Mode, type ServiceData } from '../types/index.js';
 import { isProductionMode } from '../utils/functions.js';
 
 import * as schema from './schemas.js';
@@ -49,6 +49,23 @@ export default class DatabaseHandler {
   }
 
   /********************************************************************************/
+
+  public async getMonitoredApplications() {
+    const services = await this._handler
+      .select({
+        id: this._models.serviceModel.id,
+        name: this._models.serviceModel.name,
+        uri: this._models.serviceModel.uri,
+        interval: this._models.serviceModel.monitorInterval
+      })
+      .from(this._models.serviceModel);
+
+    return new Map<string, ServiceData>(
+      services.map(({ id, name, uri, interval }) => {
+        return [id, { name: name, uri: uri, interval: interval }];
+      })
+    );
+  }
 
   public getConnection() {
     return this._conn;

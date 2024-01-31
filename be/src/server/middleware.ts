@@ -1,11 +1,11 @@
 import type { DatabaseHandler } from '../db/index.js';
-import type { Mode, NextFunction, Request, Response } from '../types/index.js';
-import {
-  MonitoringAppError,
-  STATUS,
-  logMiddleware,
-  strcasecmp
-} from '../utils/index.js';
+import type {
+  Logger,
+  NextFunction,
+  Request,
+  Response
+} from '../types/index.js';
+import { MonitoringAppError, STATUS, strcasecmp } from '../utils/index.js';
 import type WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
@@ -24,7 +24,7 @@ export const checkMethod = (allowedMethods: Set<string>) => {
 
 export const healthCheck = (
   allowedHosts: Set<string>,
-  isReadyCallback: () => Promise<string>
+  isReadyCallback: () => Promise<string> | string
 ) => {
   return async (req: Request, res: Response) => {
     if (strcasecmp(req.method, 'GET')) {
@@ -50,23 +50,19 @@ export const healthCheck = (
   };
 };
 
-export const attachContext = (db: DatabaseHandler, wss: WebsocketServer) => {
+export const attachContext = (params: {
+  db: DatabaseHandler;
+  wss: WebsocketServer;
+  logger: Logger;
+}) => {
+  const { db, wss, logger } = params;
+
   return (req: Request, _: Response, next: NextFunction) => {
     req.monitoringApp = {
       db: db,
       wss: wss,
-      logger: logMiddleware.logger
+      logger: logger
     };
-
-    return next();
-  };
-};
-
-export const attachLogMiddleware = (mode: Mode) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (mode !== 'test') {
-      return logMiddleware(req, res, next);
-    }
 
     return next();
   };

@@ -3,18 +3,13 @@ import { logger } from './logger.js';
 
 /**********************************************************************************/
 
-let env: EnvironmentVariables | undefined = undefined;
-export const getEnv = () => {
-  if (env) {
-    return env;
-  }
-
+export const getEnv = (): EnvironmentVariables => {
   const mode = process.env.NODE_ENV as Mode;
   checkRuntimeEnv(mode);
   checkEnvVariables(mode);
 
   /* eslint-disable @typescript-eslint/no-non-null-assertion */
-  env = {
+  return {
     mode: mode,
     server: {
       port: process.env.SERVER_PORT!,
@@ -29,8 +24,6 @@ export const getEnv = () => {
     db: process.env.DB_URI!
   };
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
-
-  return env;
 };
 
 const checkRuntimeEnv = (mode?: string | undefined): mode is Mode => {

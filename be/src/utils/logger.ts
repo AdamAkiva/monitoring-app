@@ -1,12 +1,4 @@
-import {
-  hostname,
-  machine,
-  pid,
-  pinoHttp,
-  platform,
-  release,
-  version
-} from '../types/index.js';
+import { pid, pinoHttp, version } from '../types/index.js';
 import { STATUS } from './constants.js';
 import { isProductionMode } from './functions.js';
 
@@ -20,10 +12,6 @@ export const logMiddleware = pinoHttp({
   errorKey: 'err',
   base: {
     pid: pid,
-    host: hostname(),
-    platform: platform(),
-    machine: machine(),
-    release: release(),
     node_ver: version,
     env: process.env.NODE_ENV
   },

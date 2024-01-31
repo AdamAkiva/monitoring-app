@@ -4,14 +4,28 @@ import { MonitoringAppError, STATUS } from '../utils/index.js';
 /**********************************************************************************/
 
 export const validateEmptyObject = (name: string, obj: unknown) => {
-  const res = Zod.object({}).strict(name).safeParse(obj);
-
-  if (!res.success) {
-    throw parseErrors(res.error);
-  }
+  return Zod.object({}).strict(name).safeParse(obj);
 };
 
-export const parseErrors = (...errs: Zod.ZodError<unknown>[]) => {
+export const checkAndParseErrors = (
+  ...results: Zod.SafeParseReturnType<unknown, unknown>[]
+) => {
+  const errs: Zod.ZodError<unknown>[] = [];
+  results.forEach((result) => {
+    if (!result.success) {
+      errs.push(result.error);
+    }
+  });
+  if (!errs.length) {
+    return undefined;
+  }
+
+  return parseErrors(errs);
+};
+
+/**********************************************************************************/
+
+const parseErrors = (errs: Zod.ZodError<unknown>[]) => {
   const delimiter = ', ';
 
   let errMsg = '';

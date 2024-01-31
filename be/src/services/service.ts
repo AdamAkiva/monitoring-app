@@ -1,7 +1,9 @@
 import type { DatabaseHandler, Transaction } from '../db/index.js';
 import { eq, type Request, type SQL, type Service } from '../types/index.js';
-import { MonitoringAppError, STATUS, sanitizeError } from '../utils/index.js';
+import { MonitoringAppError, STATUS } from '../utils/index.js';
 import type { ServiceValidator } from '../validation/index.js';
+
+import { sanitizeError } from './utils.js';
 
 /**********************************************************************************/
 

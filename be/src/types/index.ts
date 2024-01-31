@@ -1,6 +1,5 @@
 import { EventEmitter } from 'node:events';
 import { createServer, type Server } from 'node:http';
-import { hostname, machine, platform, release } from 'node:os';
 import { pid, version } from 'node:process';
 import { setTimeout as setTimeoutAsync } from 'node:timers/promises';
 import { URL } from 'node:url';
@@ -30,6 +29,16 @@ import type { Service } from './api.js';
 
 /**********************************************************************************/
 
+export type Mode = 'development' | 'production' | 'test';
+
+export type UnknownObject = { [key: string]: unknown };
+export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
+export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
+
+export type ValidatedType<T extends Zod.ZodType> = Zod.SafeParseSuccess<
+  Zod.infer<T>
+>;
+
 export type Request = ExpressRequest<
   core.ParamsDictionary,
   UnknownObject,
@@ -38,11 +47,7 @@ export type Request = ExpressRequest<
   UnknownObject
 >;
 
-export type Mode = 'development' | 'production' | 'test';
-
-export type UnknownObject = { [key: string]: unknown };
-export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
-export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
+export type Logger = HttpLogger['logger'];
 
 export type EnvironmentVariables = {
   mode: Mode;
@@ -56,8 +61,6 @@ export type EnvironmentVariables = {
   db: string;
 };
 
-/**********************************************************************************/
-
 export type ServiceData = { name: string; uri: string; interval: number };
 
 /**********************************************************************************/
@@ -70,15 +73,11 @@ export {
   eq,
   EventEmitter,
   express,
-  hostname,
   json,
   ky,
-  machine,
   pg,
   pid,
   pinoHttp,
-  platform,
-  release,
   Router,
   setTimeoutAsync,
   SQL,
@@ -89,7 +88,6 @@ export {
   WebSocketServer,
   Zod,
   type Application,
-  type HttpLogger,
   type JsonObject,
   type KyOptions,
   type NextFunction,

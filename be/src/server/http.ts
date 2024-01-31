@@ -1,138 +1,92 @@
-import { DatabaseHandler } from '../db/index.js';
+import type { DatabaseHandler } from '../db/index.js';
 import { serviceRouter } from '../routes/service.js';
 import {
   compress,
   cors,
   createServer,
   express,
-  sql,
-  type Application,
-  type JsonObject,
+  type Logger,
   type Mode,
-  type Server,
-  type ServiceData
+  type NextFunction,
+  type Request,
+  type Response
 } from '../types/index.js';
-import { isProductionMode, logger } from '../utils/index.js';
-import { WebsocketServer } from './index.js';
+import { isProductionMode } from '../utils/index.js';
 
 import * as Middlewares from './middleware.js';
+import type WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
 
-export default class HttpServer {
-  private readonly _server;
+export default class {
+  private readonly _mode;
   private readonly _db;
+  private readonly _logger;
 
-  public static async create(params: {
+  private readonly _app;
+  private readonly _server;
+
+  public constructor(params: {
     mode: Mode;
-    dbData: { name: string; uri: string };
-    routes: { api: string; health: string };
-    allowedHosts: Set<string>;
-    allowedOrigins: Set<string>;
+    db: DatabaseHandler;
+    logger: Logger;
   }) {
-    const { mode, dbData, routes, allowedHosts, allowedOrigins } = params;
+    this._mode = params.mode;
+    this._db = params.db;
+    this._logger = params.logger;
 
-    let db: DatabaseHandler | null = null;
-    let server: Server | null = null;
-    try {
-      db = new DatabaseHandler({
-        mode: mode,
-        connName: dbData.name,
-        connUri: dbData.uri
-      });
+    this._app = express();
+    this._server = createServer(this._app);
 
-      const app = express();
-      server = createServer(app);
+    this._app.disable('etag').disable('x-powered-by');
 
-      HttpServer._attachConfigurations(server);
+    this._attachConfigurations();
+    this._attachEventHandlers(this._logger);
+  }
 
-      app.disable('etag').disable('x-powered-by');
+  public listen(port: number | string, callback?: () => void) {
+    port = typeof port === 'string' ? Number(port) : port;
 
-      const allowedMethods = new Set<string>([
-        'HEAD',
-        'GET',
-        'POST',
-        'PATCH',
-        'DELETE',
-        'OPTIONS'
-      ]);
+    return this._server.listen(port, callback);
+  }
 
-      const monitoredApps = await this._sync(db);
-      const wss = new WebsocketServer(server, monitoredApps);
-      if (isProductionMode(mode)) {
-        // Make sure the reverse-proxy sets the correct settings for the logs to be
-        // accurate. See: http://expressjs.com/en/guide/behind-proxies.html
-        app.set('trust proxy', true);
-        await HttpServer._attachMiddlewareProd({
-          app: app,
-          allowedMethods: allowedMethods,
-          allowedOrigins: allowedOrigins
-        });
-      } else {
-        HttpServer._attachMiddleware({
-          app: app,
-          allowedMethods: allowedMethods,
-          allowedOrigins: allowedOrigins
-        });
-      }
+  public getHandler() {
+    return this._server;
+  }
 
-      await HttpServer._attachRoutes({
-        mode: mode,
-        app: app,
-        db: db,
-        wss: wss,
-        allowedHosts: allowedHosts,
-        routes: routes
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        logger.error(err, 'Error during server initialization');
-      }
-      await db?.close();
-      server?.close();
+  public close() {
+    this._server.close();
+  }
 
-      process.exitCode = 1;
+  public async attachMiddlewares(
+    allowedMethods: Set<string>,
+    allowedOrigins: Set<string>
+  ) {
+    const origins =
+      allowedOrigins.size === 1
+        ? Array.from(allowedOrigins)[0]
+        : Array.from(allowedOrigins);
 
-      // Even though the global event handlers are not yet set-up the docs say:
-      // 'If it is necessary to terminate the Node.js process due to an error
-      // condition, throwing an uncaught error and allowing the process to
-      // terminate accordingly is safer than calling process.exit()'
-      throw err;
+    if (!isProductionMode(this._mode)) {
+      this._app.use(
+        cors({
+          methods: Array.from(allowedMethods),
+          origin: origins
+        }),
+        Middlewares.checkMethod(allowedMethods),
+        compress()
+      );
+
+      return;
     }
 
-    // After this point, we can attach handlers which will be responsible for
-    // gracefully shutting down all of the resources used by the server
-    HttpServer._attachEventHandlers(server, db);
-
-    return new HttpServer(server, db);
-  }
-
-  private static _attachConfigurations(server: Server) {
-    server.maxHeadersCount = 256;
-    server.headersTimeout = 8_000; // millis
-    server.requestTimeout = 32_000; // millis
-    server.timeout = 524_288; // millis
-    // Limit sockets only by time, not amount of requests
-    server.maxRequestsPerSocket = 0;
-    server.keepAliveTimeout = 4_000; // millis
-  }
-
-  private static async _attachMiddlewareProd(params: {
-    app: Application;
-    allowedMethods: Set<string>;
-    allowedOrigins: Set<string>;
-  }) {
-    const { app, allowedMethods, allowedOrigins } = params;
-
-    // This is the result of a bug with helmet typescript support, if helmet
-    // version is updated, you may check if this is still needed
     const helmet = await import('helmet');
 
-    app.use(
+    this._app.use(
       Middlewares.checkMethod(allowedMethods),
       cors({
         methods: Array.from(allowedMethods),
-        origin: Array.from(allowedOrigins)
+        origin: origins
       }),
       helmet.default({
         contentSecurityPolicy: true /* require-corp */,
@@ -156,71 +110,78 @@ export default class HttpServer {
     );
   }
 
-  private static _attachMiddleware(params: {
-    app: Application;
-    allowedMethods: Set<string>;
-    allowedOrigins: Set<string>;
-  }) {
-    const { app, allowedMethods, allowedOrigins } = params;
-
-    app.use(
-      cors({
-        methods: Array.from(allowedMethods),
-        origin: Array.from(allowedOrigins)
-      }),
-      Middlewares.checkMethod(allowedMethods),
-      compress()
-    );
-  }
-
-  private static async _attachRoutes(params: {
-    mode: Mode;
-    app: Application;
-    db: DatabaseHandler;
-    wss: WebsocketServer;
+  public async attachRoutes(params: {
     allowedHosts: Set<string>;
+    readCheckCallback: () => Promise<string> | string;
+    logMiddleware: (req: Request, res: Response, next: NextFunction) => void;
+    wss: WebsocketServer;
     routes: { api: string; health: string };
   }) {
     const {
-      mode,
-      app,
-      db,
-      wss,
       allowedHosts,
+      readCheckCallback,
+      logMiddleware,
+      wss,
       routes: { api: apiRoute, health: healthCheckRoute }
     } = params;
 
-    if (!isProductionMode(mode)) {
-      await HttpServer._attachSwaggerDocs(app, apiRoute);
+    if (!isProductionMode(this._mode)) {
+      await this._attachSwaggerDocs(apiRoute);
     }
 
-    app.get(
+    // Health check route
+    this._app.get(
       healthCheckRoute,
-      Middlewares.healthCheck(allowedHosts, async () => {
-        let notReadyMsg = '';
-        try {
-          await db.getHandler().execute(sql`SELECT NOW()`);
-        } catch (err) {
-          notReadyMsg += '\nDatabase is unavailable';
-        }
-
-        return notReadyMsg;
-      })
+      Middlewares.healthCheck(allowedHosts, readCheckCallback)
     );
 
-    // Defined after the health check route to prevent health check logs every
-    // few seconds
-    app.use(Middlewares.attachLogMiddleware(mode));
-    app.use(
+    this._app.use(logMiddleware);
+    this._app.use(
       apiRoute,
-      Middlewares.attachContext(db, wss),
+      Middlewares.attachContext({
+        db: this._db,
+        wss: wss,
+        logger: this._logger
+      }),
       serviceRouter,
       Middlewares.handleMissedRoutes,
       Middlewares.errorHandler
     );
   }
 
-  private static async _attachSwaggerDocs(app: Application, apiRoute: string) {
+  /********************************************************************************/
+
+  private _attachConfigurations() {
+    this._server.maxHeadersCount = 256;
+    this._server.headersTimeout = 8_000; // millis
+    this._server.requestTimeout = 32_000; // millis
+    this._server.timeout = 524_288; // millis
+    this._server.maxRequestsPerSocket = 0;
+    this._server.keepAliveTimeout = 4_000; // millis
+  }
+
+  private _attachEventHandlers(logger: Logger) {
+    this._server.on('error', (err) => {
+      logger.fatal(err, 'HTTP Server error');
+    });
+    this._server.once('close', () => {
+      this._db.close().catch((err) => {
+        logger.error(err, 'Error during database termination');
+      });
+
+      // Graceful shutdown
+      process.exitCode = 0;
+    });
+
+    process.once('SIGINT', () => {
+      this._server.close();
+    });
+    process.once('SIGTERM', () => {
+      this._server.close();
+    });
+  }
+
+  private async _attachSwaggerDocs(apiRoute: string) {
     // This should never be enabled in production build. The dynamic imports allows
     // for 'swagger-ui-express' & 'yaml' to be devDependencies
     const [{ serve, setup }, { parse }, { resolve }, { readFileSync }] =
@@ -239,70 +200,8 @@ export default class HttpServer {
         ),
         'utf-8'
       )
-    ) as JsonObject;
-
-    app.use(`${apiRoute}/api-docs`, serve, setup(swaggerDoc));
-  }
-
-  private static async _sync(db: DatabaseHandler) {
-    const handler = db.getHandler();
-    const { serviceModel } = db.getModels();
-
-    const services = await handler
-      .select({
-        id: serviceModel.id,
-        name: serviceModel.name,
-        uri: serviceModel.uri,
-        interval: serviceModel.monitorInterval
-      })
-      .from(serviceModel);
-
-    return new Map<string, ServiceData>(
-      services.map(({ id, name, uri, interval }) => {
-        return [id, { name: name, uri: uri, interval: interval }];
-      })
     );
-  }
 
-  private static _attachEventHandlers(server: Server, db: DatabaseHandler) {
-    server.on('error', (err) => {
-      logger.error(err, 'HTTP Server error');
-    });
-    server.once('close', () => {
-      db.close().catch((e) => {
-        logger.error(e, 'Error during database termination');
-      });
-
-      // Graceful shutdown
-      process.exitCode = 0;
-    });
-
-    process.once('SIGINT', () => {
-      server.close();
-    });
-    process.once('SIGTERM', () => {
-      server.close();
-    });
-  }
-
-  /********************************************************************************/
-
-  private constructor(server: Server, db: DatabaseHandler) {
-    this._server = server;
-    this._db = db;
-  }
-
-  public listen(port: number | string, callback?: () => void) {
-    port = typeof port === 'string' ? Number(port) : port;
-
-    return this._server.listen(port, callback);
-  }
-
-  public getDatabase() {
-    return this._db;
-  }
-
-  public close() {
-    this._server.close();
+    this._app.use(`${apiRoute}/api-docs`, serve, setup(swaggerDoc));
   }
 }

@@ -1,4 +1,6 @@
-import { HttpServer } from '../../src/server/index.js';
+import { DatabaseHandler } from '../../src/db/index.js';
+import { HttpServer, type WebsocketServer } from '../../src/server/index.js';
+import { EventEmitter, sql } from '../../src/types/index.js';
 import { logger } from '../../src/utils/index.js';
 
 /**********************************************************************************/
@@ -8,29 +10,92 @@ type Provide = { provide: (key: string, value: unknown) => void };
 /**********************************************************************************/
 
 export const setup = async ({ provide }: Provide) => {
+  EventEmitter.captureRejections = true;
+
   const { mode, server: serverEnv, db: dbUri } = getTestEnv();
   const healthCheckRoute = serverEnv.healthCheck.route;
+  const allowedMethods = new Set<string>([
+    'HEAD',
+    'GET',
+    'POST',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+  ]);
 
   provide('urls', {
     baseURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.apiRoute}`,
     healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${healthCheckRoute}`
   });
 
-  const server = await HttpServer.create({
+  const db = new DatabaseHandler({
     mode: mode,
-    dbData: { name: 'monitoring-app-pg-test', uri: dbUri },
+    connName: `monitoring-app-pg-test`,
+    connUri: dbUri
+  });
+
+  const server = new HttpServer({
+    mode: mode,
+    db: db,
+    logger: {
+      ...logger,
+      debug: () => {
+        // Disable logs
+      },
+      trace: () => {
+        // Disable logs
+      },
+      info: () => {
+        // Disable logs
+      },
+      warn: () => {
+        // Disable logs
+      }
+      // error: () => {
+      //   // Disable logs
+      // },
+      // fatal: () => {
+      //   // Disable logs
+      // }
+    }
+  });
+  await server.attachMiddlewares(allowedMethods, serverEnv.allowedOrigins);
+  await server.attachRoutes({
+    allowedHosts: serverEnv.healthCheck.allowedHosts,
+    async readCheckCallback() {
+      let notReadyMsg = '';
+      try {
+        await db.getHandler().execute(sql`SELECT NOW()`);
+      } catch (err) {
+        notReadyMsg += '\nDatabase is unavailable';
+      }
+
+      return notReadyMsg;
+    },
+    logMiddleware(_, __, next) {
+      // Disable logs
+      next();
+    },
+    wss: {
+      insertMonitoredService: () => {
+        // Disable websockets on tests
+      },
+      updateMonitoredService: () => {
+        // Disable websockets on tests
+      },
+      deleteMonitoredService: () => {
+        // Disable websockets on tests
+      }
+    } as unknown as WebsocketServer,
     routes: {
       api: `/${serverEnv.apiRoute}`,
-      health: `/${healthCheckRoute}`
-    },
-    allowedHosts: new Set(),
-    allowedOrigins: new Set()
+      health: `/${serverEnv.healthCheck.route}`
+    }
   });
 
   server.listen(serverEnv.port);
 
   return async () => {
-    const db = server.getDatabase();
     const handler = db.getHandler();
     const models = db.getModels();
 
