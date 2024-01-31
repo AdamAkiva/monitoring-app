@@ -67,10 +67,6 @@ export default class DatabaseHandler {
     );
   }
 
-  public getConnection() {
-    return this._conn;
-  }
-
   public getHandler() {
     return this._handler;
   }
