@@ -1,12 +1,16 @@
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Lens
 } from '@mui/icons-material';
 import {
   Box,
   Button,
   Card,
+  CardActions,
+  CardContent,
+  CardHeader,
   Container,
   Dialog,
   DialogActions,
@@ -50,6 +54,9 @@ export {
   Box,
   Button,
   Card,
+  CardActions,
+  CardContent,
+  CardHeader,
   Container,
   DeleteIcon,
   Dialog,
@@ -60,6 +67,7 @@ export {
   EditIcon,
   Grid,
   IconButton,
+  Lens,
   React,
   ReactDOM,
   Stack,

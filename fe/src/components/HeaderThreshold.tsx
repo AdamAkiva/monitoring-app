@@ -1,4 +1,4 @@
-import { Stack, Typography, type Service } from '@/types';
+import { Grid, Typography, type Service } from '@/types';
 
 /**********************************************************************************/
 
@@ -9,46 +9,41 @@ type HeaderThresholdProps = Pick<Service, 'thresholds'>;
 export default function HeaderThreshold({ thresholds }: HeaderThresholdProps) {
   const thresholdElements = thresholds.map(({ id, lowerLimit, upperLimit }) => {
     return (
-      <Stack
+      <Grid
         key={id}
+        container={true}
         direction={'row'}
         spacing={{ xs: 2, sm: 2, md: 4, lg: 4, xl: 8 }}
-        sx={{
-          justifyContent: 'left',
-          width: '100%'
-        }}
+        justifyContent={'center'}
       >
-        <Stack direction={'row'}>
+        <Grid>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {upperLimit >= 0 ? 'Lower threshold:' : null}
           </Typography>
-          <Typography variant="body1" sx={{ ml: 0.66 }}>
+          <Typography variant="body1" sx={{ ml: 0.66, textAlign: 'center' }}>
             {lowerLimit >= 0 ? `${lowerLimit}ms` : null}
           </Typography>
-        </Stack>
-        <Stack direction={'row'}>
+        </Grid>
+        <Grid>
           <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {upperLimit >= 0 ? 'Upper threshold:' : null}
           </Typography>
-          <Typography variant="body1" sx={{ ml: 0.66 }}>
+          <Typography variant="body1" sx={{ ml: 0.66, textAlign: 'center' }}>
             {upperLimit >= 0 ? `${upperLimit}ms` : null}
           </Typography>
-        </Stack>
-      </Stack>
+        </Grid>
+      </Grid>
     );
   });
 
   return (
-    <Stack
+    <Grid
+      container={true}
       direction={'column'}
+      justifyContent={'flex-start'}
       spacing={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 4 }}
-      sx={{
-        justifyContent: 'left',
-        width: '60%',
-        m: 2
-      }}
     >
       {thresholdElements}
-    </Stack>
+    </Grid>
   );
 }

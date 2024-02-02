@@ -9,11 +9,9 @@ export const fetchServices = async (params: {
   httpInstance: HttpInstance;
   setServices: SetState<Service[]>;
   setSelectedService: SetState<Service>;
-  setLoading: SetState<boolean>;
 }) => {
-  const { httpInstance, setServices, setSelectedService, setLoading } = params;
+  const { httpInstance, setServices, setSelectedService } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<Service[]>('services', {
       method: 'get'
@@ -33,8 +31,6 @@ export const fetchServices = async (params: {
     );
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
@@ -42,13 +38,11 @@ export const createService = async (params: {
   httpInstance: HttpInstance;
   serviceToCreate: UpsertService;
   setServices: SetState<Service[]>;
-  setLoading: SetState<boolean>;
 }) => {
-  const { httpInstance, serviceToCreate, setServices, setLoading } = params;
+  const { httpInstance, serviceToCreate, setServices } = params;
 
   console.log(serviceToCreate);
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<Service>('services', {
       method: 'post',
@@ -62,8 +56,6 @@ export const createService = async (params: {
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
@@ -73,18 +65,15 @@ export const updateService = async (params: {
   serviceUpdates: UpsertService;
   setServices: SetState<Service[]>;
   setSelectedService: SetState<Service>;
-  setLoading: SetState<boolean>;
 }) => {
   const {
     httpInstance,
     serviceId,
     serviceUpdates,
     setServices,
-    setSelectedService,
-    setLoading
+    setSelectedService
   } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<Service>(
       `services/${serviceId}`,
@@ -112,8 +101,6 @@ export const updateService = async (params: {
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
@@ -122,23 +109,13 @@ export const deleteService = async (params: {
   serviceId: string;
   setServices: SetState<Service[]>;
   setSelectedService: SetState<Service>;
-  setLoading: SetState<boolean>;
 }) => {
-  const {
-    httpInstance,
-    serviceId,
-    setServices,
-    setSelectedService,
-    setLoading
-  } = params;
+  const { httpInstance, serviceId, setServices, setSelectedService } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<string>(
       `services/${serviceId}`,
-      {
-        method: 'delete'
-      }
+      { method: 'delete' }
     );
     if (res.statusCode !== 200) {
       throw new Error('Network error');
@@ -149,7 +126,9 @@ export const deleteService = async (params: {
         return serviceId === service.id;
       });
       if (removedServiceIndex >= 0) {
-        return services.splice(removedServiceIndex, 1);
+        services.splice(removedServiceIndex, 1);
+
+        return services;
       }
 
       return services;
@@ -163,7 +142,5 @@ export const deleteService = async (params: {
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };

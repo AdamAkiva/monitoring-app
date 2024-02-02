@@ -19,41 +19,50 @@ export default function HeaderInformation({
     <Stack
       direction={'row'}
       sx={{
-        width: '40%',
         justifyContent: 'space-evenly',
         alignItems: 'space-evenly',
-        p: 2
+        p: 1.33
       }}
     >
       <Stack
         direction={'column'}
-        spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
-        sx={{ justifyContent: 'left', alignItems: 'left' }}
+        justifyItems={'center'}
+        alignItems={'center'}
+        spacing={{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2 }}
       >
-        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
-          Name:
-        </Typography>
-        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
-          URI:
-        </Typography>
-        <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
-          Interval:
-        </Typography>
-      </Stack>
-      <Stack
-        direction={'column'}
-        spacing={{ xs: 0, sm: 0.5, md: 0.5, lg: 1, xl: 1 }}
-        sx={{ justifyContent: 'left', alignItems: 'left' }}
-      >
-        <Typography variant="body1" sx={{ fontSize: 18 }}>
-          {name}
-        </Typography>
-        <Typography variant="body1" sx={{ fontSize: 18 }}>
-          {uri}
-        </Typography>
-        <Typography variant="body1" sx={{ fontSize: 18 }}>
-          {interval.length ? `${interval}ms` : null}
-        </Typography>
+        <Stack
+          direction={'row'}
+          spacing={{ xs: 0, sm: 0.66, md: 0.66, lg: 1.33, xl: 1.33 }}
+        >
+          <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
+            Name:
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: 18 }}>
+            {name}
+          </Typography>
+        </Stack>
+        <Stack
+          direction={'row'}
+          spacing={{ xs: 0, sm: 0.66, md: 0.66, lg: 1.33, xl: 1.33 }}
+        >
+          <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
+            URI:
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: 18 }}>
+            {uri}
+          </Typography>
+        </Stack>
+        <Stack
+          direction={'row'}
+          spacing={{ xs: 0, sm: 0.66, md: 0.66, lg: 1.33, xl: 1.33 }}
+        >
+          <Typography variant="body1" sx={{ fontSize: 18, fontWeight: 500 }}>
+            Interval:
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: 18 }}>
+            {interval.length ? `${interval}ms` : null}
+          </Typography>
+        </Stack>
       </Stack>
     </Stack>
   );

@@ -1,13 +1,21 @@
 import {
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
   DeleteIcon,
   EditIcon,
   IconButton,
+  Lens,
+  Stack,
+  Typography,
   useCallback,
   useState,
   type Service,
   type UpsertService
 } from '@/types';
-import { SUPPORTED_COLORS } from '@/utils';
+import { SUPPORTED_COLORS, uppercaseFirstLetter } from '@/utils';
+import { ServiceValidator } from '@/validation';
 
 import SubmitForm from './SubmitForm.tsx';
 
@@ -23,7 +31,7 @@ type CardProps = {
 
 /**********************************************************************************/
 
-export default function Card({
+export default function ServiceCard({
   service,
   latency,
   onCardClick,
@@ -48,7 +56,11 @@ export default function Card({
   }, [onCardClick, service.id]);
 
   let circleColor = '#000000';
-  for (let i = 0; i < service.thresholds.length && i < 3; ++i) {
+  for (
+    let i = 0;
+    i < service.thresholds.length && i < ServiceValidator.MAX_THRESHOLDS_AMOUNT;
+    ++i
+  ) {
     if (
       latency >= service.thresholds[i].lowerLimit &&
       latency <= service.thresholds[i].upperLimit
@@ -60,7 +72,7 @@ export default function Card({
   }
 
   return (
-    <div className="card">
+    <>
       {showForm ? (
         <SubmitForm
           onSubmitForm={onSubmitForm}
@@ -68,40 +80,53 @@ export default function Card({
           state={service}
         />
       ) : null}
-      <div className="card-header">
-        <div className="card-header-modification">
+      <Card onClick={handleCardClick}>
+        <CardActions>
           <IconButton
-            aria-label="Edit service"
             type="button"
-            onClick={openForm}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              openForm();
+            }}
           >
-            <EditIcon />
+            <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
-            aria-label="Delete service"
             type="button"
+            size="small"
             onClick={(e) => {
               e.stopPropagation();
 
               handleDeleteClick();
             }}
           >
-            <DeleteIcon />
+            <DeleteIcon fontSize="small" />
           </IconButton>
-        </div>
-        <div className="card-header-title" onClick={handleCardClick}>
-          <b>Name:</b> {service.name}
-        </div>
-      </div>
-      <div className="card-body" onClick={handleCardClick}>
-        <p>
-          <b>Latency: </b>
-          {latency >= 0 ? `${latency}ms` : ''}
-        </p>
-      </div>
-      <div className="card-footer" onClick={handleCardClick}>
-        <div className="card-circle" style={{ backgroundColor: circleColor }} />
-      </div>
-    </div>
+        </CardActions>
+        <CardHeader
+          title={uppercaseFirstLetter(service.name)}
+          titleTypographyProps={{
+            variant: 'h6',
+            fontWeight: 700,
+            textAlign: 'center'
+          }}
+        />
+        <CardContent>
+          <Stack direction={'column'} spacing={2} sx={{ alignItems: 'center' }}>
+            <Stack direction={'row'} spacing={0.66} sx={{ mb: 0.66, p: 0.66 }}>
+              <Typography variant="body1" fontWeight={600}>
+                Latency:
+              </Typography>
+              <Typography variant="body1">
+                {latency >= 0 ? `${latency}ms` : ''}
+              </Typography>
+            </Stack>
+            <Lens fontSize="large" htmlColor={circleColor} />
+          </Stack>
+        </CardContent>
+      </Card>
+    </>
   );
 }

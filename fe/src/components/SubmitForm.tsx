@@ -168,17 +168,20 @@ export default function SubmitForm({
     const lowerLimits = formData.getAll('lowerLimit');
     const upperLimits = formData.getAll('upperLimit');
 
-    onSubmitForm({
-      name: formData.get('name') as string,
-      uri: formData.get('uri') as string,
-      monitorInterval: Number(formData.get('monitorInterval')),
-      thresholds: lowerLimits.map((lowerLimit, i) => {
-        return {
-          lowerLimit: Number(lowerLimit),
-          upperLimit: Number(upperLimits[i])
-        };
-      })
-    });
+    onSubmitForm(
+      {
+        name: formData.get('name') as string,
+        uri: formData.get('uri') as string,
+        monitorInterval: Number(formData.get('monitorInterval')),
+        thresholds: lowerLimits.map((lowerLimit, i) => {
+          return {
+            lowerLimit: Number(lowerLimit),
+            upperLimit: Number(upperLimits[i])
+          };
+        })
+      },
+      state?.id
+    );
 
     closeForm();
   };
@@ -257,6 +260,9 @@ export default function SubmitForm({
         />
         <IconButton
           type="button"
+          disabled={
+            thresholds.length === ServiceValidator.MAX_THRESHOLDS_AMOUNT
+          }
           sx={{ borderRadius: 0 }}
           onClick={() => {
             // Create a new threshold row on a button click
@@ -367,7 +373,7 @@ export default function SubmitForm({
         <Button type="button" onClick={closeForm}>
           Cancel
         </Button>
-        <Button type="submit">Add</Button>
+        <Button type="submit">{state ? 'Update' : 'Add'}</Button>
       </DialogActions>
     </Dialog>
   );

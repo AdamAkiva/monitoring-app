@@ -4,6 +4,8 @@ const MONITOR_INTERVAL_MIN_VALUE = 200;
 const MONITOR_INTERVAL_MAX_VALUE = Number.MAX_SAFE_INTEGER;
 const THRESHOLD_MAX_VALUE = Number.MAX_SAFE_INTEGER;
 
+export const MAX_THRESHOLDS_AMOUNT = 3;
+
 /**********************************************************************************/
 
 export const nameValidator = (name: string) => {

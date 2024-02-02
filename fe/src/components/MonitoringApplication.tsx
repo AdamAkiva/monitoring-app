@@ -22,11 +22,9 @@ import {
 } from '@/types';
 import { DEFAULT_SERVICE_DATA_WITH_ID } from '@/utils';
 
-import Card from './Card.tsx';
+import ServiceCard from './Card.tsx';
 import HeaderInformation from './HeaderInformation.tsx';
 import HeaderThreshold from './HeaderThreshold.tsx';
-
-import './MonitoringApplication.css';
 import SubmitForm from './SubmitForm.tsx';
 
 /**********************************************************************************/
@@ -35,7 +33,6 @@ export default function MonitoringApplication() {
   const httpInstance = useRef(new HttpInstance());
   const ws = useRef<WebsocketInstance | null>(null);
 
-  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState(
@@ -55,7 +52,6 @@ export default function MonitoringApplication() {
   useEffect(() => {
     void fetchServices({
       httpInstance: httpInstance.current,
-      setLoading: setLoading,
       setSelectedService: setSelectedService,
       setServices: setServices
     });
@@ -77,8 +73,7 @@ export default function MonitoringApplication() {
       void createService({
         httpInstance: httpInstance.current,
         serviceToCreate: serviceToCreate,
-        setServices: setServices,
-        setLoading: setLoading
+        setServices: setServices
       });
     },
     []
@@ -90,8 +85,7 @@ export default function MonitoringApplication() {
         serviceId: serviceId!,
         serviceUpdates: serviceUpdates,
         setServices: setServices,
-        setSelectedService: setSelectedService,
-        setLoading: setLoading
+        setSelectedService: setSelectedService
       });
     },
     []
@@ -101,8 +95,7 @@ export default function MonitoringApplication() {
       httpInstance: httpInstance.current,
       serviceId: serviceId,
       setServices: setServices,
-      setSelectedService: setSelectedService,
-      setLoading: setLoading
+      setSelectedService: setSelectedService
     });
   }, []);
 
@@ -118,7 +111,7 @@ export default function MonitoringApplication() {
 
     return (
       <Grid key={service.id} xs={12} sm={8} md={4} lg={4} xl={2}>
-        <Card
+        <ServiceCard
           service={service}
           latency={serviceLatency}
           onCardClick={handleCardClick}
@@ -133,7 +126,7 @@ export default function MonitoringApplication() {
     <Grid key={-1} xs={12} sm={8} md={4} lg={4} xl={2}>
       <IconButton
         type="button"
-        aria-label="Add new service"
+        sx={{ width: '100%', height: '100%', borderRadius: 0 }}
         onClick={() => {
           openForm();
         }}
@@ -171,7 +164,7 @@ export default function MonitoringApplication() {
     <Container maxWidth={'xl'}>
       <Stack
         direction={'row'}
-        spacing={{ xs: 2, sm: 2, md: 4, lg: 8, xl: 16 }}
+        spacing={{ xs: 4, sm: 4, md: 8, lg: 12, xl: 12 }}
         sx={{
           justifyContent: 'center',
           alignItems: 'center',

@@ -37,10 +37,7 @@ export default class DatabaseHandler {
       debug: !isProductionMode(mode)
     });
 
-    this._handler = drizzle(this._conn, {
-      schema: schema
-      // logger: !isProductionMode(mode)
-    });
+    this._handler = drizzle(this._conn, { schema: schema });
 
     this._models = {
       serviceModel: schema.serviceModel,
