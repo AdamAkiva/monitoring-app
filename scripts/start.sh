@@ -25,8 +25,8 @@ start() {
 
     printf "Building Application...\n\n" && mkdir -p $DB_DATA_FOLDER;
     if ! HOST_UID=$(id -u) HOST_GID=$(id -g) INIT_SCRIPT=$INIT_SCRIPT \
-         docker -D compose up --build --remove-orphans \
-         --always-recreate-deps --force-recreate -d --wait; then
+         docker -D compose up --build --always-recreate-deps \
+         --force-recreate -d --wait; then
         printf "\ndocker build failed, solve the error/s and try again\n\n" && exit 1;
     fi
 
