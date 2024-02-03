@@ -51,12 +51,6 @@ export const setup = async ({ provide }: Provide) => {
       warn: () => {
         // Disable logs
       }
-      // error: () => {
-      //   // Disable logs
-      // },
-      // fatal: () => {
-      //   // Disable logs
-      // }
     }
   });
   await server.attachMiddlewares(allowedMethods, serverEnv.allowedOrigins);
