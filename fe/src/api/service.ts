@@ -1,21 +1,17 @@
-import type {
-  Dispatch,
-  Service,
-  ServiceCreation,
-  SetStateAction
-} from '@/types';
-import { httpInstance } from '@/utils';
+import type { Service, SetState, UpsertService } from '@/types';
+import { DEFAULT_SERVICE_DATA_WITH_ID } from '@/utils';
+
+import type HttpInstance from './http.ts';
 
 /**********************************************************************************/
 
 export const fetchServices = async (params: {
-  setServices: Dispatch<SetStateAction<Service[]>>;
-  setSelectedService: Dispatch<SetStateAction<Service | undefined>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
+  httpInstance: HttpInstance;
+  setServices: SetState<Service[]>;
+  setSelectedService: SetState<Service>;
 }) => {
-  const { setServices, setSelectedService, setLoading } = params;
+  const { httpInstance, setServices, setSelectedService } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<Service[]>('services', {
       method: 'get'
@@ -29,25 +25,24 @@ export const fetchServices = async (params: {
       res.data[0] ?? {
         id: '',
         name: '',
-        monitorInterval: '',
-        thresholds: [{ lowerLimit: '', upperLimit: '' }]
+        monitorInterval: -1,
+        thresholds: [{ id: '', lowerLimit: -1, upperLimit: -1 }]
       }
     );
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
 export const createService = async (params: {
-  serviceToCreate: ServiceCreation;
-  setServices: Dispatch<SetStateAction<Service[]>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
+  httpInstance: HttpInstance;
+  serviceToCreate: UpsertService;
+  setServices: SetState<Service[]>;
 }) => {
-  const { serviceToCreate, setServices, setLoading } = params;
+  const { httpInstance, serviceToCreate, setServices } = params;
 
-  setLoading(true);
+  console.log(serviceToCreate);
+
   try {
     const res = await httpInstance.sendRequest<Service>('services', {
       method: 'post',
@@ -61,26 +56,28 @@ export const createService = async (params: {
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
 export const updateService = async (params: {
-  serviceUpdates: Partial<Omit<Service, 'id'>> & Pick<Service, 'id'>;
-  setServices: Dispatch<SetStateAction<Service[]>>;
-  setSelectedService: Dispatch<SetStateAction<Service | undefined>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
+  httpInstance: HttpInstance;
+  serviceId: string;
+  serviceUpdates: UpsertService;
+  setServices: SetState<Service[]>;
+  setSelectedService: SetState<Service>;
 }) => {
-  const { serviceUpdates, setServices, setSelectedService, setLoading } =
-    params;
-  const { id: serviceId, ...updates } = serviceUpdates;
+  const {
+    httpInstance,
+    serviceId,
+    serviceUpdates,
+    setServices,
+    setSelectedService
+  } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<Service>(
       `services/${serviceId}`,
-      { method: 'patch', json: updates }
+      { method: 'patch', json: serviceUpdates }
     );
     if (res.statusCode !== 200) {
       throw new Error('Network error');
@@ -96,7 +93,7 @@ export const updateService = async (params: {
       });
     });
     setSelectedService((service) => {
-      if (service && service.id === serviceId) {
+      if (service.id === serviceId) {
         return res.data;
       }
 
@@ -104,26 +101,21 @@ export const updateService = async (params: {
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };
 
 export const deleteService = async (params: {
+  httpInstance: HttpInstance;
   serviceId: string;
-  setServices: Dispatch<SetStateAction<Service[]>>;
-  setSelectedService: Dispatch<SetStateAction<Service | undefined>>;
-  setLoading: Dispatch<SetStateAction<boolean>>;
+  setServices: SetState<Service[]>;
+  setSelectedService: SetState<Service>;
 }) => {
-  const { serviceId, setServices, setSelectedService, setLoading } = params;
+  const { httpInstance, serviceId, setServices, setSelectedService } = params;
 
-  setLoading(true);
   try {
     const res = await httpInstance.sendRequest<string>(
       `services/${serviceId}`,
-      {
-        method: 'delete'
-      }
+      { method: 'delete' }
     );
     if (res.statusCode !== 200) {
       throw new Error('Network error');
@@ -133,22 +125,22 @@ export const deleteService = async (params: {
       const removedServiceIndex = services.findIndex((service) => {
         return serviceId === service.id;
       });
-      if (removedServiceIndex !== -1) {
-        return services.splice(removedServiceIndex, 1);
+      if (removedServiceIndex >= 0) {
+        services.splice(removedServiceIndex, 1);
+
+        return services;
       }
 
       return services;
     });
     setSelectedService((service) => {
-      if (service && service.id === serviceId) {
-        return undefined;
+      if (service.id === serviceId) {
+        return DEFAULT_SERVICE_DATA_WITH_ID;
       }
 
       return service;
     });
   } catch (err) {
     console.error(err);
-  } finally {
-    setLoading(false);
   }
 };

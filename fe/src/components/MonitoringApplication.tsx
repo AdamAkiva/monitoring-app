@@ -1,127 +1,189 @@
-// TODO Resolve this
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 import {
-  useCallback,
-  useEffect,
-  useState,
-  type Service,
-  type ServiceCreation,
-  type ServiceUpdates
-} from '@/types';
-import {
+  HttpInstance,
   WebsocketInstance,
   createService,
   deleteService,
   fetchServices,
   updateService
-} from '@/utils';
+} from '@/api';
+import {
+  AddIcon,
+  Box,
+  Container,
+  Grid,
+  IconButton,
+  Stack,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Service,
+  type UpsertService
+} from '@/types';
+import { DEFAULT_SERVICE_DATA_WITH_ID } from '@/utils';
 
-import AddCard from './AddCard.tsx';
-import Card from './Card.tsx';
+import ServiceCard from './Card.tsx';
 import HeaderInformation from './HeaderInformation.tsx';
 import HeaderThreshold from './HeaderThreshold.tsx';
-
-import './MonitoringApplication.css';
+import SubmitForm from './SubmitForm.tsx';
 
 /**********************************************************************************/
 
 export default function MonitoringApplication() {
-  // TODO Need to set a loading sign for the page if loading is false value
-  const [, setLoading] = useState(true);
+  const httpInstance = useRef(new HttpInstance());
+  const ws = useRef<WebsocketInstance | null>(null);
+
+  const [showForm, setShowForm] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
-  const [selectedService, setSelectedService] = useState<Service | undefined>();
-  const [latency, setLatency] = useState(0);
+  const [selectedService, setSelectedService] = useState(
+    DEFAULT_SERVICE_DATA_WITH_ID
+  );
+  const [latencyMap, setLatencyMap] = useState(new Map<string, number>());
+
+  // Passing an empty array in order for this hook to be called once, only
+  // on the initial mount
+  useEffect(() => {
+    ws.current = new WebsocketInstance({ setLatencyMap: setLatencyMap });
+
+    return ws.current.disconnect();
+  }, []);
+  // Passing an empty array in order for this hook to be called once, only
+  // on the initial mount
+  useEffect(() => {
+    void fetchServices({
+      httpInstance: httpInstance.current,
+      setSelectedService: setSelectedService,
+      setServices: setServices
+    });
+  }, []);
 
   const handleCardClick = useCallback(
     (serviceId: string) => {
       setSelectedService(
         services.find((service) => {
           return serviceId === service.id;
-        })
+        }) ?? DEFAULT_SERVICE_DATA_WITH_ID
       );
     },
     [services]
   );
-  const handleCreate = useCallback((service: ServiceCreation) => {
-    void createService({
-      serviceToCreate: service,
-      setServices: setServices,
-      setLoading: setLoading
-    });
-  }, []);
-  const handleUpdate = useCallback((serviceUpdates: ServiceUpdates) => {
-    void updateService({
-      serviceUpdates: serviceUpdates,
-      setServices: setServices,
-      setSelectedService: setSelectedService,
-      setLoading: setLoading
-    });
-  }, []);
-  const handleDelete = useCallback((serviceId: string) => {
+
+  const handleServiceCreation = useCallback(
+    (serviceToCreate: UpsertService) => {
+      void createService({
+        httpInstance: httpInstance.current,
+        serviceToCreate: serviceToCreate,
+        setServices: setServices
+      });
+    },
+    []
+  );
+  const handleServiceUpdate = useCallback(
+    (serviceUpdates: UpsertService, serviceId?: string) => {
+      void updateService({
+        httpInstance: httpInstance.current,
+        serviceId: serviceId!,
+        serviceUpdates: serviceUpdates,
+        setServices: setServices,
+        setSelectedService: setSelectedService
+      });
+    },
+    []
+  );
+  const handleServiceDelete = useCallback((serviceId: string) => {
     void deleteService({
+      httpInstance: httpInstance.current,
       serviceId: serviceId,
       setServices: setServices,
-      setSelectedService: setSelectedService,
-      setLoading: setLoading
+      setSelectedService: setSelectedService
     });
   }, []);
 
-  useEffect(() => {
-    new WebsocketInstance(setLatency);
-
-    void fetchServices({
-      setServices: setServices,
-      setSelectedService: setSelectedService,
-      setLoading: setLoading
-    });
+  const openForm = useCallback(() => {
+    setShowForm(true);
+  }, []);
+  const closeForm = useCallback(() => {
+    setShowForm(false);
   }, []);
 
-  const bodyCards = services.map((service, index) => {
+  const bodyCards = services.map((service) => {
+    const serviceLatency = latencyMap.get(service.id) ?? -1;
+
     return (
-      <Card
-        key={index}
-        service={service}
-        latency={latency}
-        onCardClick={handleCardClick}
-        // TODO Resolve this
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-expect-error
-        onSubmitForm={handleUpdate}
-        onDeleteClick={handleDelete}
-      />
+      <Grid key={service.id} xs={12} sm={8} md={4} lg={4} xl={2}>
+        <ServiceCard
+          service={service}
+          latency={serviceLatency}
+          onCardClick={handleCardClick}
+          onSubmitForm={handleServiceUpdate}
+          onDeleteClick={handleServiceDelete}
+        />
+      </Grid>
     );
   });
+  // There will always be a single AddCard, so the key can be static
   bodyCards.push(
-    // TODO Resolve this
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-expect-error
-    <AddCard key={bodyCards.length + 1} onSubmitForm={handleCreate} />
+    <Grid key={-1} xs={12} sm={8} md={4} lg={4} xl={2}>
+      <IconButton
+        type="button"
+        sx={{ width: '100%', height: '100%', borderRadius: 0 }}
+        onClick={() => {
+          openForm();
+        }}
+      >
+        <AddIcon />
+      </IconButton>
+      {showForm ? (
+        <SubmitForm
+          onSubmitForm={handleServiceCreation}
+          closeForm={closeForm}
+          state={null}
+        />
+      ) : null}
+    </Grid>
   );
+
   const headerData = {
     headerInformation: (
       <HeaderInformation
-        name={selectedService?.name ?? ''}
-        uri={selectedService?.uri ?? ''}
-        interval={selectedService?.monitorInterval.toString() ?? ''}
+        name={selectedService.name}
+        uri={selectedService.uri}
+        interval={
+          selectedService.monitorInterval >= 0
+            ? selectedService.monitorInterval.toString()
+            : ''
+        }
       />
     ),
     headerThresholds: (
-      // TODO Resolve this
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-expect-error
-      <HeaderThreshold thresholds={selectedService?.thresholds} />
-    ),
-    bodyCards: bodyCards
+      <HeaderThreshold thresholds={selectedService.thresholds} />
+    )
   };
 
   return (
-    <div className="app">
-      <div className="header">
+    <Container maxWidth={'xl'}>
+      <Stack
+        direction={'row'}
+        spacing={{ xs: 4, sm: 4, md: 8, lg: 12, xl: 12 }}
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          pt: 2,
+          pb: 4
+        }}
+      >
         {headerData.headerInformation}
         {headerData.headerThresholds}
-      </div>
-      <div className="body">{bodyCards}</div>
-    </div>
+      </Stack>
+      <Box sx={{ flexGrow: 1, mt: 10 }}>
+        <Grid
+          container={true}
+          spacing={{ xs: 2, sm: 2, md: 4, lg: 8, xl: 8 }}
+          flexWrap={'wrap'}
+        >
+          {bodyCards}
+        </Grid>
+      </Box>
+    </Container>
   );
 }

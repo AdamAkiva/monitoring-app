@@ -1,10 +1,9 @@
 import { getEnv } from './config.js';
-import { STATUS, VALIDATION } from './constants.js';
+import { ERR_CODES, STATUS, VALIDATION } from './constants.js';
 import MonitoringAppError from './error.js';
 import {
   filterNullAndUndefined,
-  findClientIp,
-  sanitizeError,
+  isProductionMode,
   strcasecmp
 } from './functions.js';
 import { logMiddleware, logger } from './logger.js';
@@ -12,14 +11,14 @@ import { logMiddleware, logger } from './logger.js';
 /**********************************************************************************/
 
 export {
+  ERR_CODES,
   MonitoringAppError,
   STATUS,
   VALIDATION,
   filterNullAndUndefined,
-  findClientIp,
   getEnv,
+  isProductionMode,
   logMiddleware,
   logger,
-  sanitizeError,
   strcasecmp
 };

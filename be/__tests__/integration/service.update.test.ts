@@ -17,17 +17,17 @@ import {
 
 /**********************************************************************************/
 
-describe('Update tests', () => {
+describe.concurrent('Update tests', () => {
   const { baseURL } = inject('urls');
   const serviceRouteURL = `${baseURL}/services`;
 
   describe('Valid', () => {
     describe('Name', () => {
-      it.concurrent('Different name', async () => {
+      it('Different name', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_1',
           uri: 'https://SERVICE_UPDATE_1.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -56,11 +56,11 @@ describe('Update tests', () => {
           [omit(res.data, 'id')]
         );
       });
-      it.concurrent('Self update', async () => {
+      it('Self update', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_3',
           uri: 'https://SERVICE_UPDATE_3.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -91,11 +91,11 @@ describe('Update tests', () => {
       });
     });
     describe('Uri', () => {
-      it.concurrent('Different uri', async () => {
+      it('Different uri', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_4',
           uri: 'https://SERVICE_UPDATE_4.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -126,11 +126,11 @@ describe('Update tests', () => {
           [omit(res.data, 'id')]
         );
       });
-      it.concurrent('Self update', async () => {
+      it('Self update', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_6',
           uri: 'https://SERVICE_UPDATE_6.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -163,11 +163,11 @@ describe('Update tests', () => {
       });
     });
     describe('Monitor interval', () => {
-      it.concurrent('Different value', async () => {
+      it('Different value', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_7',
           uri: 'https://SERVICE_UPDATE_7.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -182,7 +182,7 @@ describe('Update tests', () => {
         const [{ id: serviceId }] = await createServices([serviceData]);
 
         const updateData: UpdateService = {
-          monitorInterval: 30
+          monitorInterval: 1_000
         };
         const res = await sendHttpRequest<Service>(
           `${serviceRouteURL}/${serviceId}`,
@@ -198,11 +198,11 @@ describe('Update tests', () => {
           [omit(res.data, 'id')]
         );
       });
-      it.concurrent('Self update', async () => {
+      it('Self update', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_8',
           uri: 'https://SERVICE_UPDATE_8.com',
-          monitorInterval: 30,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -217,7 +217,7 @@ describe('Update tests', () => {
         const [{ id: serviceId }] = await createServices([serviceData]);
 
         const updateData: UpdateService = {
-          monitorInterval: 30
+          monitorInterval: 1_000
         };
         const res = await sendHttpRequest<Service>(
           `${serviceRouteURL}/${serviceId}`,
@@ -235,11 +235,11 @@ describe('Update tests', () => {
       });
     });
     describe('Thresholds', () => {
-      it.concurrent('Add thresholds', async () => {
+      it('Add thresholds', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_9',
           uri: 'https://SERVICE_UPDATE_9.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -273,11 +273,11 @@ describe('Update tests', () => {
           [omit(res.data, 'id')]
         );
       });
-      it.concurrent('Remove thresholds', async () => {
+      it('Remove thresholds', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_11',
           uri: 'https://SERVICE_UPDATE_11.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -308,11 +308,11 @@ describe('Update tests', () => {
           [omit(res.data, 'id')]
         );
       });
-      it.concurrent('Change thresholds', async () => {
+      it('Change thresholds', async () => {
         const serviceData: CreateService = {
           name: 'SERVICE_UPDATE_12',
           uri: 'https://SERVICE_UPDATE_12.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -349,12 +349,12 @@ describe('Update tests', () => {
     });
   });
   describe('Invalid', () => {
-    it.concurrent('Empty update', async () => {
+    it('Empty update', async () => {
       const [{ id: serviceId }] = await createServices([
         {
           name: 'SERVICE_UPDATE_13',
           uri: 'https://SERVICE_UPDATE_13.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -375,12 +375,12 @@ describe('Update tests', () => {
 
       expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
     });
-    it.concurrent('Duplicate', async () => {
+    it('Duplicate', async () => {
       const [, { id: serviceId2 }] = await createServices([
         {
           name: 'SERVICE_UPDATE_14',
           uri: 'https://SERVICE_UPDATE_14.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -395,7 +395,7 @@ describe('Update tests', () => {
         {
           name: 'SERVICE_UPDATE_15',
           uri: 'https://SERVICE_UPDATE_15.com',
-          monitorInterval: 20,
+          monitorInterval: 1_000,
           thresholds: [
             {
               lowerLimit: 0,
@@ -419,12 +419,12 @@ describe('Update tests', () => {
 
       expect(statusCode).toBe(STATUS.CONFLICT.CODE);
     });
-    it.concurrent('With non-existing fields', async () => {
+    it('With non-existing fields', async () => {
       const [{ id: serviceId }] = await createServices([
         {
           name: 'SERVICE_UPDATE_16',
           uri: 'https://SERVICE_UPDATE_16.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -448,7 +448,7 @@ describe('Update tests', () => {
 
       expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
     });
-    it.concurrent('Invalid id value', async () => {
+    it('Invalid id value', async () => {
       const { statusCode } = await sendHttpRequest<never>(
         `${serviceRouteURL}/abcdefg12345`,
         {
@@ -459,7 +459,7 @@ describe('Update tests', () => {
 
       expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
     });
-    it.concurrent('Non-existent id', async () => {
+    it('Non-existent id', async () => {
       const { statusCode } = await sendHttpRequest<never>(
         `${serviceRouteURL}/${randomUUID()}`,
         {
@@ -471,12 +471,12 @@ describe('Update tests', () => {
       expect(statusCode).toBe(STATUS.NOT_FOUND.CODE);
     });
     describe('Name', () => {
-      it.concurrent('Empty value', async () => {
+      it('Empty value', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_19',
             uri: 'https://SERVICE_UPDATE_19.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -500,12 +500,12 @@ describe('Update tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too long', async () => {
+      it('Too long', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_20',
             uri: 'https://SERVICE_UPDATE_20.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -533,12 +533,12 @@ describe('Update tests', () => {
       });
     });
     describe('Uri', () => {
-      it.concurrent('Empty value', async () => {
+      it('Empty value', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_21',
             uri: 'https://SERVICE_UPDATE_21.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -562,12 +562,12 @@ describe('Update tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too long', async () => {
+      it('Too long', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_22',
             uri: 'https://SERVICE_UPDATE_22.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -595,12 +595,12 @@ describe('Update tests', () => {
       });
     });
     describe('Monitor interval', () => {
-      it.concurrent('Invalid type', async () => {
+      it('Invalid type', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_23',
             uri: 'https://SERVICE_UPDATE_23.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -624,12 +624,12 @@ describe('Update tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too low', async () => {
+      it('Too low', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_24',
             uri: 'https://SERVICE_UPDATE_24.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -655,12 +655,12 @@ describe('Update tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Too high', async () => {
+      it('Too high', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_25',
             uri: 'https://SERVICE_UPDATE_25.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -688,12 +688,12 @@ describe('Update tests', () => {
       });
     });
     describe('Thresholds', () => {
-      it.concurrent('Invalid type', async () => {
+      it('Invalid type', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_26',
             uri: 'https://SERVICE_UPDATE_26.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -718,12 +718,12 @@ describe('Update tests', () => {
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
       describe('Lower limit', () => {
-        it.concurrent('Invalid type', async () => {
+        it('Invalid type', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_27',
               uri: 'https://SERVICE_UPDATE_27.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -747,12 +747,12 @@ describe('Update tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too low', async () => {
+        it('Too low', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_28',
               uri: 'https://SERVICE_UPDATE_28.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -783,12 +783,12 @@ describe('Update tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too high', async () => {
+        it('Too high', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_29',
               uri: 'https://SERVICE_UPDATE_29.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -821,12 +821,12 @@ describe('Update tests', () => {
         });
       });
       describe('Upper limit', () => {
-        it.concurrent('Invalid type', async () => {
+        it('Invalid type', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_30',
               uri: 'https://SERVICE_UPDATE_30.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -850,12 +850,12 @@ describe('Update tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too low', async () => {
+        it('Too low', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_31',
               uri: 'https://SERVICE_UPDATE_31.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -886,12 +886,12 @@ describe('Update tests', () => {
 
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
-        it.concurrent('Too high', async () => {
+        it('Too high', async () => {
           const [{ id: serviceId }] = await createServices([
             {
               name: 'SERVICE_UPDATE_32',
               uri: 'https://SERVICE_UPDATE_32.com',
-              monitorInterval: 20,
+              monitorInterval: 500,
               thresholds: [
                 {
                   lowerLimit: 0,
@@ -923,12 +923,12 @@ describe('Update tests', () => {
           expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
         });
       });
-      it.concurrent('Lower limit equal to upper limit', async () => {
+      it('Lower limit equal to upper limit', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_33',
             uri: 'https://SERVICE_UPDATE_33.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,
@@ -954,12 +954,12 @@ describe('Update tests', () => {
 
         expect(statusCode).toBe(STATUS.BAD_REQUEST.CODE);
       });
-      it.concurrent('Lower limit larger than upper limit', async () => {
+      it('Lower limit larger than upper limit', async () => {
         const [{ id: serviceId }] = await createServices([
           {
             name: 'SERVICE_UPDATE_34',
             uri: 'https://SERVICE_UPDATE_34.com',
-            monitorInterval: 20,
+            monitorInterval: 500,
             thresholds: [
               {
                 lowerLimit: 0,

@@ -1,4 +1,6 @@
-import { HttpServer } from '../../src/server/index.js';
+import { DatabaseHandler } from '../../src/db/index.js';
+import { HttpServer, type WebsocketServer } from '../../src/server/index.js';
+import { EventEmitter, sql } from '../../src/types/index.js';
 import { logger } from '../../src/utils/index.js';
 
 /**********************************************************************************/
@@ -7,31 +9,89 @@ type Provide = { provide: (key: string, value: unknown) => void };
 
 /**********************************************************************************/
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setup = async ({ provide }: Provide) => {
+  EventEmitter.captureRejections = true;
+
   const { mode, server: serverEnv, db: dbUri } = getTestEnv();
+  const healthCheckRoute = serverEnv.healthCheck.route;
+  const allowedMethods = new Set<string>([
+    'HEAD',
+    'GET',
+    'POST',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+  ]);
 
   provide('urls', {
     baseURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.apiRoute}`,
-    healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${serverEnv.healthCheckRoute}`
+    healthCheckURL: `${serverEnv.base}:${serverEnv.port}/${healthCheckRoute}`
   });
 
-  const server = await HttpServer.create({
+  const db = new DatabaseHandler({
     mode: mode,
-    dbData: { name: 'monitoring-app-pg-test', uri: dbUri },
+    connName: `monitoring-app-pg-test`,
+    connUri: dbUri
+  });
+
+  const server = new HttpServer({
+    mode: mode,
+    db: db,
+    logger: {
+      ...logger,
+      debug: () => {
+        // Disable logs
+      },
+      trace: () => {
+        // Disable logs
+      },
+      info: () => {
+        // Disable logs
+      },
+      warn: () => {
+        // Disable logs
+      }
+    }
+  });
+  await server.attachMiddlewares(allowedMethods, serverEnv.allowedOrigins);
+  await server.attachRoutes({
+    allowedHosts: serverEnv.healthCheck.allowedHosts,
+    async readCheckCallback() {
+      let notReadyMsg = '';
+      try {
+        await db.getHandler().execute(sql`SELECT NOW()`);
+      } catch (err) {
+        notReadyMsg += '\nDatabase is unavailable';
+      }
+
+      return notReadyMsg;
+    },
+    logMiddleware(_, __, next) {
+      // Disable logs
+      next();
+    },
+    wss: {
+      insertMonitoredService: () => {
+        // Disable websockets on tests
+      },
+      updateMonitoredService: () => {
+        // Disable websockets on tests
+      },
+      deleteMonitoredService: () => {
+        // Disable websockets on tests
+      }
+    } as unknown as WebsocketServer,
     routes: {
       api: `/${serverEnv.apiRoute}`,
-      health: `/${serverEnv.healthCheckRoute}`
-    },
-    allowedOrigins: []
+      health: `/${serverEnv.healthCheck.route}`
+    }
   });
 
   server.listen(serverEnv.port);
 
   return async () => {
-    const { getHandler, getModels } = server.getDatabase();
-    const handler = getHandler();
-    const models = getModels();
+    const handler = db.getHandler();
+    const models = db.getModels();
 
     /* eslint-disable drizzle/enforce-delete-with-where */
     await handler.delete(models.serviceModel);
@@ -56,7 +116,11 @@ export const getTestEnv = () => {
       base: 'http://localhost',
       port: process.env.TEST_SERVER_PORT!,
       apiRoute: process.env.API_ROUTE!,
-      healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!
+      healthCheck: {
+        route: process.env.HEALTH_CHECK_ROUTE!,
+        allowedHosts: new Set(process.env.ALLOWED_HOSTS!.split(','))
+      },
+      allowedOrigins: new Set(process.env.ALLOWED_ORIGINS!.split(','))
     },
     db: process.env.TEST_DB_URI!
   };
@@ -98,6 +162,8 @@ const checkMissingEnvVariables = () => {
     ['TEST_SERVER_PORT', `Missing 'TEST_SERVER_PORT', env variable`],
     ['API_ROUTE', `Missing 'API_ROUTE', env variable`],
     ['HEALTH_CHECK_ROUTE', `Missing 'HEALTH_CHECK_ROUTE', env variable`],
+    ['ALLOWED_HOSTS', `Missing 'ALLOWED_HOSTS', env variable`],
+    ['ALLOWED_ORIGINS', `Missing 'ALLOWED_ORIGINS', env variable`],
     ['TEST_DB_URI', `Missing 'TEST_DB_URI', env variable`]
   ]);
 };

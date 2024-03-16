@@ -1,26 +1,18 @@
 import {
-  HttpInstance,
-  WebsocketInstance,
-  createService,
-  deleteService,
-  fetchServices,
-  httpInstance,
-  updateService
-} from './api';
+  DEFAULT_SERVICE_DATA_WITH_ID,
+  DEFAULT_SERVICE_DATA_WITHOUT_ID,
+  SUPPORTED_COLORS
+} from './data.ts';
 import { getEnvValue, getRuntimeMode } from './env.ts';
 import { uppercaseFirstLetter } from './functions.ts';
 
 /**********************************************************************************/
 
 export {
-  HttpInstance,
-  WebsocketInstance,
-  createService,
-  deleteService,
-  fetchServices,
+  DEFAULT_SERVICE_DATA_WITH_ID,
+  DEFAULT_SERVICE_DATA_WITHOUT_ID,
   getEnvValue,
   getRuntimeMode,
-  httpInstance,
-  updateService,
+  SUPPORTED_COLORS,
   uppercaseFirstLetter
 };

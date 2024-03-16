@@ -1,12 +1,12 @@
 import type { DatabaseHandler } from '../db/index.js';
-import type { Mode, NextFunction, Request, Response } from '../types/index.js';
-import {
-  MonitoringAppError,
-  STATUS,
-  logMiddleware,
-  strcasecmp
-} from '../utils/index.js';
-import type WebSocketServer from './websocket.js';
+import type {
+  Logger,
+  NextFunction,
+  Request,
+  Response
+} from '../types/index.js';
+import { MonitoringAppError, STATUS, strcasecmp } from '../utils/index.js';
+import type WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
 
@@ -22,7 +22,10 @@ export const checkMethod = (allowedMethods: Set<string>) => {
   };
 };
 
-export const healthCheck = (isReadyCallback: () => Promise<string>) => {
+export const healthCheck = (
+  allowedHosts: Set<string>,
+  isReadyCallback: () => Promise<string> | string
+) => {
   return async (req: Request, res: Response) => {
     if (strcasecmp(req.method, 'GET')) {
       return res
@@ -30,10 +33,8 @@ export const healthCheck = (isReadyCallback: () => Promise<string>) => {
         .json(`Health check must be a 'GET' request`);
     }
 
-    // TODO Add the hostname for every allowed server when it is ready
-    // (e.g NGINX, ingress, Apache, etc...)
-    const allowedHosts = new Set<string>(['localhost']);
-    if (!allowedHosts.has(req.hostname)) {
+    const hostName = req.hostname.toLowerCase();
+    if (!allowedHosts.has(hostName)) {
       return res.status(STATUS.FORBIDDEN.CODE).json(STATUS.FORBIDDEN.MSG);
     }
 
@@ -49,23 +50,19 @@ export const healthCheck = (isReadyCallback: () => Promise<string>) => {
   };
 };
 
-export const attachContext = (db: DatabaseHandler, wss: WebSocketServer) => {
+export const attachContext = (params: {
+  db: DatabaseHandler;
+  wss: WebsocketServer;
+  logger: Logger;
+}) => {
+  const { db, wss, logger } = params;
+
   return (req: Request, _: Response, next: NextFunction) => {
     req.monitoringApp = {
       db: db,
       wss: wss,
-      logger: logMiddleware.logger
+      logger: logger
     };
-
-    return next();
-  };
-};
-
-export const attachLogMiddleware = (mode: Mode) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (mode !== 'test') {
-      return logMiddleware(req, res, next);
-    }
 
     return next();
   };

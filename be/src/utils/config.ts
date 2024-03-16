@@ -3,34 +3,27 @@ import { logger } from './logger.js';
 
 /**********************************************************************************/
 
-let env: EnvironmentVariables | undefined = undefined;
-export const getEnv = () => {
-  if (env) {
-    return env;
-  }
-
+export const getEnv = (): EnvironmentVariables => {
   const mode = process.env.NODE_ENV as Mode;
   checkRuntimeEnv(mode);
   checkEnvVariables(mode);
 
   /* eslint-disable @typescript-eslint/no-non-null-assertion */
-  env = {
+  return {
     mode: mode,
     server: {
       port: process.env.SERVER_PORT!,
       url: process.env.SERVER_URL!,
       apiRoute: process.env.API_ROUTE!,
-      healthCheckRoute: process.env.HEALTH_CHECK_ROUTE!,
-      allowedOrigins:
-        typeof process.env.ALLOWED_ORIGINS === 'string' && mode !== 'production'
-          ? process.env.ALLOWED_ORIGINS
-          : process.env.ALLOWED_ORIGINS!.split(',')
+      healthCheck: {
+        route: process.env.HEALTH_CHECK_ROUTE!,
+        allowedHosts: new Set(process.env.ALLOWED_HOSTS!.split(','))
+      },
+      allowedOrigins: new Set(process.env.ALLOWED_ORIGINS!.split(','))
     },
     db: process.env.DB_URI!
   };
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
-
-  return env;
 };
 
 const checkRuntimeEnv = (mode?: string | undefined): mode is Mode => {
@@ -71,6 +64,7 @@ const checkMissingEnvVariables = (mode: Mode) => {
     ['SERVER_URL', `Missing 'SERVER_URL', env variable`],
     ['API_ROUTE', `Missing 'API_ROUTE', env variable`],
     ['HEALTH_CHECK_ROUTE', `Missing 'HEALTH_CHECK_ROUTE', env variable`],
+    ['ALLOWED_HOSTS', `Missing 'ALLOWED_HOSTS', env variable`],
     ['ALLOWED_ORIGINS', `Missing 'ALLOWED_ORIGINS', env variable`],
     ['DB_URI', `Missing 'DB_URI', env variable`]
   ]);

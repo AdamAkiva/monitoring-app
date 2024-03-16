@@ -1,28 +1,17 @@
-import {
-  hostname,
-  machine,
-  pid,
-  pinoHttp,
-  platform,
-  release,
-  version
-} from '../types/index.js';
+import { pid, pinoHttp, version } from '../types/index.js';
 import { STATUS } from './constants.js';
+import { isProductionMode } from './functions.js';
 
 /**********************************************************************************/
 
 export const logMiddleware = pinoHttp({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'trace',
+  level: isProductionMode(process.env.NODE_ENV) ? 'info' : 'trace',
   depthLimit: 5,
   edgeLimit: 100,
   messageKey: 'msg',
   errorKey: 'err',
   base: {
     pid: pid,
-    host: hostname(),
-    platform: platform(),
-    machine: machine(),
-    release: release(),
     node_ver: version,
     env: process.env.NODE_ENV
   },

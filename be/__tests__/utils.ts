@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import ky, { type Options as KyOptions } from 'ky';
 import {
   afterAll,
   afterEach,
@@ -8,38 +9,28 @@ import {
   describe,
   expect,
   inject,
-  it
+  it,
+  vi
 } from 'vitest';
 
-import * as controllers from '../../src/controllers/index.js';
+import { STATUS, VALIDATION } from '../src/utils/index.js';
 import type {
-  CreateThreshold,
-  CreateService as DCreateService
-} from '../../src/db/index.js';
-import * as Middlewares from '../../src/server/middleware.js';
-import * as services from '../../src/services/index.js';
-import {
-  ky,
-  type KyOptions,
-  type Optional,
-  type RequiredFields,
-  type Service,
-  type UnknownObject
-} from '../../src/types/index.js';
-import { STATUS, VALIDATION } from '../../src/utils/index.js';
+  Service,
+  ServiceCreationObj,
+  ServiceUpdateObj as UpdateService
+} from './config/api.js';
 
 /**********************************************************************************/
 
-export type CreateService = Optional<DCreateService, 'name'> & {
-  thresholds: Omit<CreateThreshold, 'serviceId'>[];
-};
-export type UpdateService = Partial<DCreateService> & {
-  thresholds?: Omit<CreateThreshold, 'serviceId'>[];
-};
+export type UnknownObject = { [key: string]: unknown };
+export type RequiredFields<T, K extends keyof T> = Required<Pick<T, K>> & T;
+export type Optional<T, K extends keyof T> = Omit<T, K> & Pick<Partial<T>, K>;
+
+export type CreateService = Optional<ServiceCreationObj, 'name'>;
 
 /**********************************************************************************/
 
-export const omit = <T extends UnknownObject, K extends string & keyof T>(
+export const omit = <T extends {}, K extends string & keyof T>(
   obj: T,
   ...keys: K[]
 ): Omit<T, K> => {
@@ -123,14 +114,14 @@ export const createServices = async (servicesData: CreateService[]) => {
   // client requested
   const services: Service[] = [];
   for (const serviceData of servicesData) {
+    // On purpose to keep the creation order consistent
+    // eslint-disable-next-line no-await-in-loop
     const { data, statusCode } = await sendHttpRequest<Service>(
       serviceRouteURL,
-      {
-        method: 'post',
-        json: serviceData
-      }
+      { method: 'post', json: serviceData }
     );
     expect(statusCode).toBe(STATUS.CREATED.CODE);
+    checkMatchIgnoringOrder([serviceData], [data]);
 
     services.push(data);
   }
@@ -141,19 +132,18 @@ export const createServices = async (servicesData: CreateService[]) => {
 /**********************************************************************************/
 
 export {
-  Middlewares,
   STATUS,
   VALIDATION,
   afterAll,
   afterEach,
   beforeAll,
   beforeEach,
-  controllers,
   describe,
   expect,
   inject,
   it,
   randomUUID,
-  services,
-  type Service
+  vi,
+  type Service,
+  type UpdateService
 };

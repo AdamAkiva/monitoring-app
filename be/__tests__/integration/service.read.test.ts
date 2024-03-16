@@ -13,17 +13,17 @@ import {
 
 /**********************************************************************************/
 
-describe('Read tests', () => {
+describe.concurrent('Read tests', () => {
   const { baseURL } = inject('urls');
   const serviceRouteURL = `${baseURL}/services`;
 
   describe('Valid', () => {
-    it.concurrent('Valid', async () => {
+    it('Valid', async () => {
       const servicesData: CreateService[] = [
         {
           name: 'SERVICE_READ_1',
           uri: 'https://SERVICE_READ_1.com',
-          monitorInterval: 20,
+          monitorInterval: 500,
           thresholds: [
             {
               lowerLimit: 0,
@@ -38,7 +38,7 @@ describe('Read tests', () => {
         {
           name: 'SERVICE_READ_2',
           uri: 'https://SERVICE_READ_2.com',
-          monitorInterval: 10,
+          monitorInterval: 2_000,
           thresholds: [
             {
               lowerLimit: 0,
@@ -57,7 +57,7 @@ describe('Read tests', () => {
         {
           name: 'SERVICE_READ_3',
           uri: 'https://SERVICE_READ_3.com',
-          monitorInterval: 100,
+          monitorInterval: 1_000,
           thresholds: [
             {
               lowerLimit: 0,

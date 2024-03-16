@@ -14,7 +14,7 @@ export interface ServiceCreationObj {
    * The name for the monitored service. Defaults to uri if not supplied
    * @example "Google"
    */
-  name?: string;
+  name: string;
   /**
    * @format uri
    * @example "https://google.com"
@@ -37,7 +37,7 @@ export interface ServiceCreationObj {
   }[];
 }
 
-export interface ServiceUpdatesObj {
+export interface ServiceUpdateObj {
   /** @example "Google" */
   name?: string;
   /**
@@ -79,6 +79,11 @@ export interface Service {
   monitorInterval: number;
   /** @minItems 1 */
   thresholds: {
+    /**
+     * @format uuid
+     * @example "19070b12-2644-40c6-8860-ded80b76459c"
+     */
+    id: string;
     /**
      * Milliseconds representing the lower limit for the threshold check
      * @example 20

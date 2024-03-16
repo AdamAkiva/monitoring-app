@@ -1,31 +1,37 @@
 import {
-  CiTrash,
-  MdEdit,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  DeleteIcon,
+  EditIcon,
+  IconButton,
+  Lens,
+  Stack,
+  Typography,
+  useCallback,
   useState,
   type Service,
-  type ServiceCreation,
-  type ServiceUpdates
+  type UpsertService
 } from '@/types';
+import { SUPPORTED_COLORS, uppercaseFirstLetter } from '@/utils';
+import { ServiceValidator } from '@/validation';
 
 import SubmitForm from './SubmitForm.tsx';
 
-import './Card.css';
-
 /**********************************************************************************/
-
-const colors = ['#33cc33', '#ff9900', '#ff3300'];
 
 type CardProps = {
   service: Service;
   latency: number;
   onCardClick: (serviceId: string) => void;
-  onSubmitForm: (serviceUpdates: ServiceCreation | ServiceUpdates) => void;
+  onSubmitForm: (serviceUpdates: UpsertService, serviceId?: string) => void;
   onDeleteClick: (serviceId: string) => void;
 };
 
 /**********************************************************************************/
 
-export default function Card({
+export default function ServiceCard({
   service,
   latency,
   onCardClick,
@@ -34,67 +40,93 @@ export default function Card({
 }: CardProps) {
   const [showForm, setShowForm] = useState(false);
 
-  const openForm = () => {
+  const openForm = useCallback(() => {
     setShowForm(true);
-  };
-  const closeForm = () => {
+  }, []);
+  const closeForm = useCallback(() => {
     setShowForm(false);
-  };
+  }, []);
 
-  const handleCardClick = () => {
-    onCardClick(service.id);
-  };
-  const handleDeleteClick = () => {
+  const handleDeleteClick = useCallback(() => {
     onDeleteClick(service.id);
-  };
+  }, [onDeleteClick, service.id]);
+
+  const handleCardClick = useCallback(() => {
+    onCardClick(service.id);
+  }, [onCardClick, service.id]);
 
   let circleColor = '#000000';
-  for (let i = 0; i < service.thresholds.length && i < 3; ++i) {
+  for (
+    let i = 0;
+    i < service.thresholds.length && i < ServiceValidator.MAX_THRESHOLDS_AMOUNT;
+    ++i
+  ) {
     if (
       latency >= service.thresholds[i].lowerLimit &&
       latency <= service.thresholds[i].upperLimit
     ) {
-      circleColor = colors[i];
+      circleColor = SUPPORTED_COLORS[i];
       break;
     }
-    circleColor = colors[2];
+    circleColor = SUPPORTED_COLORS[2];
   }
 
-  const styles = {
-    backgroundColor: circleColor
-  };
-
   return (
-    <div className="card">
-      {showForm && (
+    <>
+      {showForm ? (
         <SubmitForm
           onSubmitForm={onSubmitForm}
           closeForm={closeForm}
           state={service}
         />
-      )}
-      <div className="card-header">
-        <div className="card-header-modification">
-          <button onClick={openForm}>
-            <MdEdit />
-          </button>
-          <button onClick={handleDeleteClick}>
-            <CiTrash />
-          </button>
-        </div>
-        <div className="card-header-title" onClick={handleCardClick}>
-          <b>Name:</b> {service.name}
-        </div>
-      </div>
-      <div className="card-body" onClick={handleCardClick}>
-        <p>
-          <b>Latency: </b>
-          {latency !== -1 ? `${latency}ms` : null}
-        </p>
-      </div>
-      <div className="card-footer" onClick={handleCardClick}>
-        <div className="card-circle" style={styles}></div>
-      </div>
-    </div>
+      ) : null}
+      <Card onClick={handleCardClick}>
+        <CardActions>
+          <IconButton
+            type="button"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              openForm();
+            }}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            type="button"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+
+              handleDeleteClick();
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </CardActions>
+        <CardHeader
+          title={uppercaseFirstLetter(service.name)}
+          titleTypographyProps={{
+            variant: 'h6',
+            fontWeight: 700,
+            textAlign: 'center'
+          }}
+        />
+        <CardContent>
+          <Stack direction={'column'} spacing={2} sx={{ alignItems: 'center' }}>
+            <Stack direction={'row'} spacing={0.66} sx={{ mb: 0.66, p: 0.66 }}>
+              <Typography variant="body1" fontWeight={600}>
+                Latency:
+              </Typography>
+              <Typography variant="body1">
+                {latency >= 0 ? `${latency}ms` : ''}
+              </Typography>
+            </Stack>
+            <Lens fontSize="large" htmlColor={circleColor} />
+          </Stack>
+        </CardContent>
+      </Card>
+    </>
   );
 }

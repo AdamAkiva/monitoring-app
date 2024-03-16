@@ -3,7 +3,6 @@
 // which is not a part of the application. Any changes with the dependencies
 // must be included ONLY from external packages
 
-import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import {
   index,
   integer,
@@ -33,28 +32,6 @@ import {
  * lose their precision and are only precision up to a second instead of up to
  * 6 (nanoseconds)
  */
-
-/**********************************************************************************/
-
-type CreateEntity<T> = Omit<T, 'createdAt' | 'id' | 'updatedAt'>;
-type UpdateEntity<T> = Partial<Omit<T, 'createdAt'>> & { id: string };
-
-/**********************************************************************************/
-
-export type DService = InferSelectModel<typeof serviceModel>;
-export type DThreshold = InferSelectModel<typeof thresholdModel>;
-
-/**********************************************************************************/
-
-export type CreateService = CreateEntity<InferInsertModel<typeof serviceModel>>;
-export type CreateThreshold = CreateEntity<
-  InferInsertModel<typeof thresholdModel>
->;
-
-/**********************************************************************************/
-
-export type UpdateService = UpdateEntity<CreateService>;
-export type UpdateThreshold = UpdateEntity<CreateThreshold>;
 
 /**********************************************************************************/
 

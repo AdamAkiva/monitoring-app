@@ -1,6 +1,6 @@
 import HttpServer from './http.js';
-import WebSocketServer from './websocket.js';
+import WebsocketServer from './websocket.js';
 
 /**********************************************************************************/
 
-export { HttpServer, WebSocketServer };
+export { HttpServer, WebsocketServer };
